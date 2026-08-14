@@ -1,0 +1,22 @@
+# Keep run inputs/outputs and scratch OUT of version control.
+# The tutorial tells learners to keep working files in a private dir — this repo
+# models that: never commit datasets, checkpoints, or job artifacts.
+*.pdf
+agent-labs/
+outputs/
+checkpoints/
+*.pt
+*.ckpt
+
+# Editor / OS cruft
+.DS_Store
+.vscode/
+*.swp
+
+# Python
+__pycache__/
+*.pyc
+
+# Local agent config that may hold identity/tokens (MAG PAT, IRI/Globus tokens)
+.claude/settings.local.json
+.env

@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "alcf-iri": {
+      "command": "python",
+      "args": [
+        "mcp/hpc/alcf_server.py"
+      ]
+    },
+    "nersc-iri": {
+      "command": "python",
+      "args": [
+        "mcp/hpc/nersc_server.py"
+      ]
+    },
+    "olcf-iri": {
+      "command": "python",
+      "args": [
+        "mcp/hpc/olcf_iri_server.py"
+      ]
+    }
+  }
+}
