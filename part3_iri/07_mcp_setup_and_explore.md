@@ -116,3 +116,7 @@ Continue to [Lab 08 — IRI Job Submission and Monitoring](08_iri_job_submission
 3. **Health, not just status.** For ALCF, ask it to check the filesystem health of
    your scratch space (`check_filesystem_health`). Read-only pre-flighting like
    this is how an agent de-risks a run.
+
+---
+
+*Tutorial created by Huihuo Zheng, huihuo.zheng@anl.gov, Trinity Science.*

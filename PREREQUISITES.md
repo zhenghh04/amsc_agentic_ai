@@ -186,3 +186,7 @@ yet (or the token expired); follow what it prints.
 
 When Steps 1–3 are done for at least one facility and the Step 4 read-only check
 works, start [Part 3 → Lab 07](part3_iri/07_mcp_setup_and_explore.md).
+
+---
+
+*Tutorial created by Huihuo Zheng, huihuo.zheng@anl.gov, Trinity Science.*

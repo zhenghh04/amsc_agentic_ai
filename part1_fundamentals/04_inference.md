@@ -143,3 +143,7 @@ gets a lot bigger. That's the whole spine (sim → train → infer) ready to sca
 agent on a real system — [Part 2](../part2_hpc/README.md) (native on a login
 node) or [Part 3](../part3_iri/README.md) (orchestrate all three facilities from
 your laptop).
+
+---
+
+*Tutorial created by Huihuo Zheng, huihuo.zheng@anl.gov, Trinity Science.*

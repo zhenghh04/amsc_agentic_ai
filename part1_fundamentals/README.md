@@ -46,3 +46,7 @@ inference) is the throughline: you run tiny versions here and scale the *same
 three* up in Parts 2 and 3.
 
 Start with [Lab 00](00_setup_vscode_claude_mag.md).
+
+---
+
+*Tutorial created by Huihuo Zheng, huihuo.zheng@anl.gov, Trinity Science.*

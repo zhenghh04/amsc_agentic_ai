@@ -176,3 +176,7 @@ you still have to verify, you're ready to run the other two spine workloads
 (training, inference) and then scale all three onto real DOE systems.
 
 **Next:** [Lab 02 — MCP & tools: how a prompt becomes a tool call →](02_mcp_and_tools.md)
+
+---
+
+*Tutorial created by Huihuo Zheng, huihuo.zheng@anl.gov, Trinity Science.*

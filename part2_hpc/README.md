@@ -92,3 +92,7 @@ the `fs` server — neither is "more correct," and nothing stops you from doing
 both.
 
 Start with [Lab 05 — Run Claude natively on your system](05_native_on_your_system.md).
+
+---
+
+*Tutorial created by Huihuo Zheng, huihuo.zheng@anl.gov, Trinity Science.*

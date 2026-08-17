@@ -26,3 +26,7 @@ and 3:
 
 Point the agent at any of them: *"read this log and tell me what failed, the root
 cause with quoted evidence, and how to fix it."*
+
+---
+
+*Tutorial created by Huihuo Zheng, huihuo.zheng@anl.gov, Trinity Science.*

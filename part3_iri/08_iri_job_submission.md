@@ -135,3 +135,7 @@ Continue to [Lab 09 — Move data with Globus](09_data_movement.md).
 3. **Tighten the ask.** Re-run the sanity job with a single sentence and see if
    the agent fills queue/nodes/walltime/account from context. What it still asks
    you are the load-bearing parameters.
+
+---
+
+*Tutorial created by Huihuo Zheng, huihuo.zheng@anl.gov, Trinity Science.*

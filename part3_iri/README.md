@@ -88,3 +88,7 @@ this same trade-off for the `fs` server — neither is "more correct," and nothi
 stops you from doing both.
 
 Start with [Lab 07 — Connect to ALCF/NERSC/OLCF & explore](07_mcp_setup_and_explore.md).
+
+---
+
+*Tutorial created by Huihuo Zheng, huihuo.zheng@anl.gov, Trinity Science.*

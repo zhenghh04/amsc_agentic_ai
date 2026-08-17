@@ -219,3 +219,7 @@ skip ahead and come back — nothing here is a dead end.
   (<https://amsc-docs-d762d2.gitlab.io/model-access-gateway>). For anything
   facility-specific, that facility's user support (see
   [PREREQUISITES.md](PREREQUISITES.md) Reference table).
+
+---
+
+*Tutorial created by Huihuo Zheng, huihuo.zheng@anl.gov, Trinity Science.*

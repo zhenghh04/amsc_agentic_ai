@@ -116,3 +116,7 @@ Back to the [Part 2 overview](README.md).
    Part 3's capstone can also drive.
 3. **Two nodes.** Push DDP to 2 nodes. What changed in the launch geometry and the
    scheduler request? Note how the *loop* stayed identical.
+
+---
+
+*Tutorial created by Huihuo Zheng, huihuo.zheng@anl.gov, Trinity Science.*

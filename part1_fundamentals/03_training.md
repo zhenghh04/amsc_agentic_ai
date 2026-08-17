@@ -147,3 +147,7 @@ agent submits it as a job, monitors it, and triages failures with this very loop
 now spending real node-hours. You've built the muscle locally, for free.
 
 **Next:** [Lab 04 — drive an inference run →](04_inference.md)
+
+---
+
+*Tutorial created by Huihuo Zheng, huihuo.zheng@anl.gov, Trinity Science.*

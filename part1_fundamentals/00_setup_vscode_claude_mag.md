@@ -275,3 +275,7 @@ other lab is identical.
 ---
 
 **Next:** [Lab 01 — The 101: drive a small HPC simulation →](01_hpc_simulation.md)
+
+---
+
+*Tutorial created by Huihuo Zheng, huihuo.zheng@anl.gov, Trinity Science.*

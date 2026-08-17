@@ -143,3 +143,7 @@ jobs toward a goal across facilities, and reflecting on the whole campaign
 afterward. See [GOING_FURTHER.md](../GOING_FURTHER.md) for the bigger picture.
 
 Back to the [tutorial overview](../README.md).
+
+---
+
+*Tutorial created by Huihuo Zheng, huihuo.zheng@anl.gov, Trinity Science.*

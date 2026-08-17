@@ -97,3 +97,7 @@ portability — is exactly what a campaign is made of.
 Everything you learned in Part 1 — grounded prompts, verifying results, adding
 tools via MCP — applies unchanged. HPC is just a bigger, more powerful set of
 tools at the edge of the same loop.
+
+---
+
+*Tutorial created by Huihuo Zheng, huihuo.zheng@anl.gov, Trinity Science.*

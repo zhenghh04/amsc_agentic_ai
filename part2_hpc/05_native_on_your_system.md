@@ -265,3 +265,7 @@ Continue to [Lab 06 — Scale the spine](06_scale_the_spine.md).
    is "no matching tool."
 3. **Two nodes.** Rerun with 2 nodes (`select=2` / `-N 2`) and an MPI or `srun`
    launch. What did the agent change? Same shape as Lab 06's scaling.
+
+---
+
+*Tutorial created by Huihuo Zheng, huihuo.zheng@anl.gov, Trinity Science.*

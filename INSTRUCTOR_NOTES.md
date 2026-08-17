@@ -119,3 +119,7 @@ a login on one of the systems.
 - Point interested users to [Part 2](part2_hpc/README.md) and
   [Part 3](part3_iri/README.md) (real jobs), [GOING_FURTHER.md](GOING_FURTHER.md),
   and their facility's user support.
+
+---
+
+*Tutorial created by Huihuo Zheng, huihuo.zheng@anl.gov, Trinity Science.*

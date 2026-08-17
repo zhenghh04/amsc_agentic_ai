@@ -184,3 +184,7 @@ That's Part 3 — see [part3_iri/README.md](../part3_iri/README.md) and
 First, finish the spine: [Lab 03 — training](03_training.md) and
 [Lab 04 — inference](04_inference.md). Or head back to the
 [track overview](../README.md).
+
+---
+
+*Tutorial created by Huihuo Zheng, huihuo.zheng@anl.gov, Trinity Science.*

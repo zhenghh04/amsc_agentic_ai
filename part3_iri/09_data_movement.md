@@ -120,3 +120,7 @@ Continue to [Lab 10 — Spine end-to-end across facilities](10_end_to_end_across
    line.
 3. **Right filesystem.** Ask why datasets and job outputs belong on scratch/project
    rather than home on each facility. Getting this right avoids quota grief later.
+
+---
+
+*Tutorial created by Huihuo Zheng, huihuo.zheng@anl.gov, Trinity Science.*
