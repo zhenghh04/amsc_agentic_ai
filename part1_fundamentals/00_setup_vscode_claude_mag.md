@@ -93,7 +93,10 @@ brew install node
 
 # Linux — nvm (per-user, needs no root; recommended)
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-#   reopen your shell, then:
+#   nvm isn't on your PATH yet — either reopen your shell, or load it now:
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                    # loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # loads nvm bash_completion
 nvm install --lts
 #   (or use your distro packages, e.g.  sudo apt install nodejs npm)
 ```

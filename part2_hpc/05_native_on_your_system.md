@@ -55,6 +55,10 @@ shared machine:
 node --version   # need 18+; if missing or old:
 # via the module system, if one provides node (varies by system), or via nvm:
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+# nvm isn't on your PATH yet — reopen your shell, or load it in the current one:
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                    # loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # loads nvm bash_completion
 nvm install --lts
 
 # Claude Code to a user prefix (never sudo, never global on shared infra)
