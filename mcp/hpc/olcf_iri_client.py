@@ -1,3 +1,6 @@
+# Author: Huihuo Zheng, huihuo.zheng@anl.gov
+# Copyright: Trinity Science 2026
+
 """Async HTTP client for the OLCF IRI Facility API and Globus Transfer.
 
 Despite the s3m.olcf.ornl.gov hostname, this is the DOE IRI Facility API

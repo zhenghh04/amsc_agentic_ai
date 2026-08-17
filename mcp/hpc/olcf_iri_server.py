@@ -1,3 +1,6 @@
+# Author: Huihuo Zheng, huihuo.zheng@anl.gov
+# Copyright: Trinity Science 2026
+
 """MCP server exposing OLCF IRI Facility API tools via FastMCP.
 
 This server talks to the OLCF moderate-enclave IRI host (default:

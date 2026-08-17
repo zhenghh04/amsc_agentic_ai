@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Author: Huihuo Zheng, huihuo.zheng@anl.gov
+# Copyright: Trinity Science 2026
+
 """
 Browser-based Globus authentication helper for the ALCF IRI API examples.
 

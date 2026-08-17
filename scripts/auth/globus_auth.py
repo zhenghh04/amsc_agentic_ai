@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Author: Huihuo Zheng, huihuo.zheng@anl.gov
+# Copyright: Trinity Science 2026
+
 """Unified Globus authentication for Transfer + Compute tokens.
 
 Performs a single OAuth2 login flow to obtain both Transfer and Compute

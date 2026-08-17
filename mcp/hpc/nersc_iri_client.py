@@ -1,3 +1,6 @@
+# Author: Huihuo Zheng, huihuo.zheng@anl.gov
+# Copyright: Trinity Science 2026
+
 """Async HTTP client for the NERSC IRI API and Globus Transfer.
 
 Authentication: NERSC IRI uses a Globus OAuth2 bearer token. Obtain one with

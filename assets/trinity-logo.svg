@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96" role="img" aria-label="Trinity Science">
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="7">
+    <ellipse cx="48" cy="34" rx="13" ry="26" transform="rotate(0 48 48)" stroke="#38bdf8" />
+    <ellipse cx="48" cy="34" rx="13" ry="26" transform="rotate(120 48 48)" stroke="#2dd4bf" />
+    <ellipse cx="48" cy="34" rx="13" ry="26" transform="rotate(240 48 48)" stroke="#a3e635" />
+  </g>
+</svg>

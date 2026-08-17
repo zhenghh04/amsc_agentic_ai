@@ -1,3 +1,6 @@
+# Author: Huihuo Zheng, huihuo.zheng@anl.gov
+# Copyright: Trinity Science 2026
+
 """Async HTTP client for the ALCF IRI Facility API and Globus Transfer."""
 
 import asyncio

@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Author: Huihuo Zheng, huihuo.zheng@anl.gov
+# Copyright: Trinity Science 2026
+
 """Browser-based Globus authentication for the NERSC IRI API.
 
 Uses the same pattern as alcf_iri_token.py but with NERSC-specific scopes.

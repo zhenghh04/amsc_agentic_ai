@@ -1,3 +1,6 @@
+# Author: Huihuo Zheng, huihuo.zheng@anl.gov
+# Copyright: Trinity Science 2026
+
 """MCP server exposing NERSC IRI API tools via FastMCP."""
 
 import json

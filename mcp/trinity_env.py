@@ -1,3 +1,6 @@
+# Author: Huihuo Zheng, huihuo.zheng@anl.gov
+# Copyright: Trinity Science 2026
+
 """Centralized per-user .env resolution for all Trinity MCP servers.
 
 WHY THIS EXISTS

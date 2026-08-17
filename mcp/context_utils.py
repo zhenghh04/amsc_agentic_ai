@@ -1,3 +1,6 @@
+# Author: Huihuo Zheng, huihuo.zheng@anl.gov
+# Copyright: Trinity Science 2026
+
 """Small helpers for keeping MCP tool responses context-bounded."""
 
 from __future__ import annotations

@@ -1,4 +1,11 @@
+<p align="center">
+  <img src="assets/trinity-logo.svg" alt="Trinity Science" width="72" height="72">
+</p>
+
 # Hands-On: Agentic AI for AmSC
+
+*Author: Huihuo Zheng, huihuo.zheng@anl.gov*<br>
+*August 2026*
 
 A hands-on tutorial for getting started with **agentic AI** as an AmSC
 (American Science Cloud) user. You'll set up an AI coding agent — **Claude Code**
@@ -193,3 +200,11 @@ lab.
 ---
 
 *A self-contained fundamentals track for agentic AI on the American Science Cloud.*
+
+---
+
+<p align="center">
+  <img src="assets/trinity-logo.svg" alt="Trinity Science" width="48" height="48">
+</p>
+
+*Tutorial created by Huihuo Zheng, huihuo.zheng@anl.gov, Trinity Science.*
