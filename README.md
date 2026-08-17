@@ -157,6 +157,50 @@ Part 1 — laptop only                Part 2 — native, on your HPC system
 
 ---
 
+## Authentication — the two credentials
+
+The agent uses **two different, independent credentials**, and it helps to keep
+them straight from the start. Everything is token-based; there are no passwords
+or long-lived API keys checked into this repo.
+
+**1. The MAG token — lets the agent talk to the *model*.** Every part needs this.
+It's a **Personal Access Token** you mint once from the AmSC Model Access Gateway
+and point Claude Code at (Lab 00). It authenticates *you → the LLM*. Part 1 needs
+nothing else.
+
+**2. Facility tokens — let the agent's tools reach the *HPC systems*.** Only
+Part 3 needs these. Each facility authenticates as **you** via its own flow:
+
+| Facility (system) | Flow | Token in `.env` |
+| --- | --- | --- |
+| ALCF (Polaris) | Browser **Globus** OAuth2 login (`scripts/auth/alcf_iri_token.py`) | `ALCF_IRI_TOKEN` |
+| NERSC (Perlmutter) | Browser **Globus** login, forced through `nersc.gov` identity | `NERSC_IRI_TOKEN` |
+| OLCF (Frontier) | Manually minted **myOLCF API token** (no browser flow) | `OLCF_IRI_TOKEN` |
+| Any facility (data movement) | **Globus Transfer** token (`scripts/auth/globus_auth.py`) | `GLOBUS_TRANSFER_TOKEN` |
+
+### How it works
+
+- **Login → `.env`.** The ALCF/NERSC helpers run a Globus NativeApp OAuth2 flow
+  (a localhost-callback browser login, or a copy-paste code over SSH), then write
+  the access token into **`.env` in this folder**. The Globus refresh token is
+  cached under `~/.globus/`, so access tokens auto-refresh without re-logging-in
+  until the refresh token itself expires. OLCF is the exception — you paste a
+  portal-minted token into `.env` yourself.
+- **`.env` is read fresh on every call.** Each MCP server installs a token
+  provider that **re-reads `.env` on every request** rather than caching the token
+  at startup. So when a token is rotated or refreshed mid-session, the running
+  server picks it up automatically — no restart. Calling `authenticate()` with no
+  argument simply re-reads the current token from `.env`.
+- **`.env` is a real secret.** It holds a plaintext bearer token — keep it out of
+  git (this repo `.gitignore`s it) and never print or share it. That's why the
+  tutorial's discipline is "never read or echo `.env`."
+
+The step-by-step setup for all of the above lives in
+[PREREQUISITES.md](PREREQUISITES.md) (Part 3). Part 1 and Part 2 only ever need
+the MAG token.
+
+---
+
 ## How to work through a lab
 
 1. Open the lab and follow the steps top to bottom.
