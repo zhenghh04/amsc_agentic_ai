@@ -21,8 +21,7 @@ is installed on the shared login nodes.
 | `olcf-iri` | **Frontier** | manual API token from myOLCF (compute scope) |
 
 You don't need all three. Set up the one(s) you have; the servers you didn't
-authenticate simply report "not authenticated" and are harmless. A multi-facility
-user gets the full payoff in Lab 10's capstone.
+authenticate simply report "not authenticated" and are harmless.
 
 ---
 
@@ -32,10 +31,6 @@ user gets the full payoff in Lab 10's capstone.
 | --- | --- | --- | --- |
 | [07](07_mcp_setup_and_explore.md) | Connect to ALCF/NERSC/OLCF & explore (read-only) | 20–30 min | free (no jobs) |
 | [08](08_iri_job_submission.md) | IRI job submission and monitoring | 30–45 min | ~1 node-minute |
-| [09](09_data_movement.md) | Move data with Globus | 25–35 min | free (transfer only) |
-| [10](10_end_to_end_across_facilities.md) | Spine end-to-end across facilities (capstone) | 45–60 min | ~a few node-minutes |
-
-**Order matters** — each lab builds on the last. Do them in sequence.
 
 ## The one loop to learn
 
@@ -60,8 +55,7 @@ Frontier.
 - **MCP mental model** — the facility tools are just MCP tools; the agent loop
   doesn't change, only what's at the edge.
 - **The spine** — the simulation/training/inference you built in Part 1 is what
-  you now orchestrate on real systems, and (Lab 10) the *same* workload across
-  three of them.
+  you now orchestrate on real systems.
 - **Failure triage** — the OOM/timeout signatures from Part 1/2 are what these
   jobs produce; Part 3 is where the submit → read log → fix → resubmit loop earns
   its keep.

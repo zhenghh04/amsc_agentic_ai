@@ -119,7 +119,13 @@ read log → fix → resubmit — and it's the bridge to Part 4.
 
 You've run the core loop through IRI. Next, feed it real data.
 
-Continue to [Lab 09 — Move data with Globus](09_data_movement.md).
+---
+
+## What's next
+
+You now know how to submit and monitor jobs on any of the three facilities
+through MCP tools, from your laptop. Ready for the next Part, or to go deeper?
+See the track README's [GOING_FURTHER](../GOING_FURTHER.md) section.
 
 ---
 
@@ -127,8 +133,7 @@ Continue to [Lab 09 — Move data with Globus](09_data_movement.md).
 
 1. **Same job, different facility.** If you have access to more than one, submit
    the *identical* sanity job on a second facility. Notice the agent switches
-   servers and adapts `nvidia-smi`/`rocm-smi` — the cross-facility portability
-   Lab 10's capstone builds on.
+   servers and adapts `nvidia-smi`/`rocm-smi` automatically.
 2. **Deliberate failure.** Submit with a **wrong account name** on purpose, watch
    it fail, and let the agent catch it from the error text. Building trust in the
    triage loop is worth one wasted submit.

@@ -90,7 +90,6 @@ tunnel required. See [part2_hpc/README.md](part2_hpc/README.md) for the full int
 | Lab | Title | Time | Approx cost |
 | --- | --- | --- | --- |
 | [05](part2_hpc/05_native_on_your_system.md) | Run Claude natively on your system + a first job | 35–50 min | ~1 node-min |
-| [06](part2_hpc/06_scale_the_spine.md) | Scale the spine — a real training run natively | 30–45 min | ~few node-min |
 
 ## Part 3 — Orchestrating Job Submission via IRI (all three facilities)
 
@@ -104,8 +103,6 @@ allocation on at least one facility, and the bundled MCP servers authenticated.
 | --- | --- | --- | --- |
 | [07](part3_iri/07_mcp_setup_and_explore.md) | Connect to ALCF/NERSC/OLCF & explore (read-only) | 20–30 min | free |
 | [08](part3_iri/08_iri_job_submission.md) | IRI job submission and monitoring | 30–45 min | ~1 node-min |
-| [09](part3_iri/09_data_movement.md) | Move data with Globus | 25–35 min | free |
-| [10](part3_iri/10_end_to_end_across_facilities.md) | End-to-end spine across facilities (capstone) | 45–60 min | ~few node-min |
 
 Every lab is self-contained with: **objectives · time · prerequisites · concepts
 · hands-on steps · "what just happened" · a checkpoint · exercises**.
@@ -114,14 +111,14 @@ Every lab is self-contained with: **objectives · time · prerequisites · conce
 Part 1 — laptop only                Part 2 — native, on your HPC system
 ────────────────────                ────────────────────────────────────
 00 set up Claude Code + MAG          05 run Claude natively + a first job
-01 simulation ─┐                     06 scale the spine (training) natively
+01 simulation ─┐
 02 training ───┤ the spine
 03 inference ──┘                     Part 3 — laptop + IRI/MCP (3 facilities)
                                      ─────────────────────────────────────
                     PREREQUISITES.md  07 connect & explore (MCP setup)
                     (Part 3 only:     08 IRI job submission + monitor
-                     account,         09 move data with Globus
-                     allocation,      10 spine end-to-end across facilities
+                     account,
+                     allocation,
                      IRI MCP servers)
 ```
 

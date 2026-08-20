@@ -15,8 +15,8 @@ way you would by hand.
 
 > Needs an **interactive account** on one of the three systems — nothing from
 > [PREREQUISITES.md](../PREREQUISITES.md) is required for this Part (that file is
-> for [Part 3](../part3_iri/README.md)). Lab 05's submit step and Lab 06
-> **spend real node-hours** — keep to a debug queue, 1 node, minutes.
+> for [Part 3](../part3_iri/README.md)). Lab 05's submit step
+> **spends real node-hours** — keep to a debug queue, 1 node, minutes.
 
 ---
 
@@ -25,10 +25,6 @@ way you would by hand.
 | Lab | Title | Time | Approx cost |
 | --- | --- | --- | --- |
 | [05](05_native_on_your_system.md) | Run Claude natively on your system + a first job | 35–50 min | ~1 node-minute |
-| [06](06_scale_the_spine.md) | Scale the spine — a real training run natively | 30–45 min | ~few node-minutes |
-
-**Order matters** — Lab 06 assumes Lab 05's setup (Claude replying on the login
-node, and you know your account/queue).
 
 ## Pick one system
 

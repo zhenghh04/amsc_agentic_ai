@@ -250,7 +250,13 @@ auditable set of named operations across all three facilities.
 🎉 You can run `claude` directly on a real DOE system and drive a job with nothing
 but a shell. Next: scale the training spine.
 
-Continue to [Lab 06 — Scale the spine](06_scale_the_spine.md).
+---
+
+## What's next
+
+You now know the agent-on-login-node loop and how scheduler jobs work. Ready to
+orchestrate across all three facilities without running `claude` on shared
+infrastructure? Head to [Part 3 — IRI](../part3_iri/README.md).
 
 ---
 
