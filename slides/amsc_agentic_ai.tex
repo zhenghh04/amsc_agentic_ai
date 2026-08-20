@@ -57,6 +57,15 @@
 \logo{\IfFileExists{logos/argonne_logo.pdf}%
   {\includegraphics[height=0.42cm]{logos/argonne_logo.pdf}}{}}
 
+% Trinity brand mark — overlay in the top-right corner (used on the Trinity slides)
+\newcommand{\trinitymark}{%
+  \IfFileExists{logos/trinity_logo.pdf}{%
+    \begin{tikzpicture}[remember picture,overlay]
+      \node[anchor=north east, inner sep=0pt]
+        at ([xshift=-8pt,yshift=-3pt]current page.north east)
+        {\includegraphics[height=0.82cm]{logos/trinity_logo.pdf}};
+    \end{tikzpicture}}{}}
+
 % ---------------------------------------------------------------- shadowed boxes
 \newtcolorbox{featbox}[2]{
   enhanced,
@@ -107,6 +116,26 @@
   morekeywords={mpiexec},
   showstringspaces=false,
   numbers=left, numberstyle=\tiny\color{midgray}, numbersep=6pt
+}
+\lstdefinestyle{pysnip}{
+  language=Python,
+  basicstyle=\ttfamily\scriptsize\color{labink},
+  keywordstyle=\color{accentblue}\bfseries,
+  commentstyle=\color{midgray}\itshape,
+  stringstyle=\color{accentteal},
+  backgroundcolor=\color{lightgray},
+  frame=single, framerule=0.4pt, rulecolor=\color{midgray!60},
+  breaklines=true, columns=fullflexible,
+  xleftmargin=4pt, xrightmargin=4pt, framexleftmargin=4pt,
+  showstringspaces=false, numbers=none, aboveskip=2pt, belowskip=2pt
+}
+\lstdefinestyle{treesnip}{
+  basicstyle=\ttfamily\scriptsize\color{labink},
+  backgroundcolor=\color{lightgray},
+  frame=single, framerule=0.4pt, rulecolor=\color{midgray!60},
+  breaklines=false, columns=fullflexible,
+  xleftmargin=4pt, xrightmargin=4pt, framexleftmargin=4pt,
+  showstringspaces=false, numbers=none, aboveskip=2pt, belowskip=2pt
 }
 
 % ---------------------------------------------------------------- graphicspath
@@ -222,13 +251,55 @@
   \end{center}
 \end{frame}
 
+% ================================================================ WHAT AMSC OFFERS
+\begin{frame}{What AmSC offers for agentic workflows: programmable compute \& models}
+  \begin{columns}[t, totalwidth=\textwidth]
+    \begin{column}{0.54\textwidth}
+      \begin{featbox}{accentblue}{\faPlug\ IRI API — programmable HPC compute}
+        \footnotesize
+        A REST API to the schedulers at each facility. One instance per site:
+        \vspace{4pt}
+        \begin{itemize}\setlength\itemsep{4pt}
+          \item[\faServer] \textbf{NERSC}\\
+            {\scriptsize docs \href{https://api.iri.nersc.gov}{\texttt{api.iri.nersc.gov}}
+             \textperiodcentered\ API \href{https://api.iri.nersc.gov/api/v1/}{\texttt{/api/v1/}}}
+          \item[\faServer] \textbf{ALCF}\\
+            {\scriptsize docs \href{https://api.alcf.anl.gov}{\texttt{api.alcf.anl.gov}}
+             \textperiodcentered\ API \href{https://api.alcf.anl.gov/api/v1/}{\texttt{/api/v1/}}}
+          \item[\faServer] \textbf{ESnet}\\
+            {\scriptsize \href{https://iri-dev.ppg.es.net}{\texttt{iri-dev.ppg.es.net}}}
+        \end{itemize}
+      \end{featbox}
+    \end{column}
+    \begin{column}{0.44\textwidth}
+      \begin{featbox}{accentteal}{\faBrain\ MAG — Model Access Gateway}
+        \footnotesize
+        A gateway to hosted LLMs for agentic workflows — OpenAI-compatible,
+        token-authenticated.
+        \vspace{4pt}
+        \begin{itemize}\setlength\itemsep{5pt}
+          \item[\faUserPlus] \textbf{Request access}\\
+            {\scriptsize\href{https://amsc-docs-d762d2.gitlab.io/GM-getting-started/\#access--login}{amsc-docs\ldots/GM-getting-started \#access--login}}
+          \item[\faKey] \textbf{Set a token} (after approval)\\
+            {\scriptsize\href{https://amsc-docs-d762d2.gitlab.io/model-access-gateway/\#quick-start}{amsc-docs\ldots/model-access-gateway \#quick-start}}
+        \end{itemize}
+      \end{featbox}
+    \end{column}
+  \end{columns}
+  \vspace{6pt}
+  \begin{center}
+    {\footnotesize\color{midgray}
+      \textbf{IRI} moves the compute; \textbf{MAG} powers the reasoning — together they let an agent run science end-to-end.}
+  \end{center}
+\end{frame}
+
 % ================================================================ OVERVIEW ARCHITECTURE
-\begin{frame}{Three AmSC tools give an AI agent programmable access to DOE compute}
+\begin{frame}{AmSC tools give an AI agent programmable access to DOE compute}
   \centering
   \begin{tikzpicture}[node distance=5mm and 18mm]
     % Agent node
     \node[agentnode, text width=2.2cm] (agent)
-      {\faBrain\ \textbf{AI Agent}\\[2pt]\scriptsize\normalfont Claude Code\\\scriptsize on your laptop};
+      {\faBrain\ \textbf{AI Agent}\\[2pt]\scriptsize\normalfont (via MAG)\\\scriptsize Claude Code\\\scriptsize on your laptop};
 
     % Tool nodes (stacked vertically to the right of agent)
     \node[toolnode=accentblue, text width=2.6cm, above right=4mm and 22mm of agent] (iri)
@@ -395,34 +466,48 @@
 \end{frame}
 
 % ================================================================ INTEGRATION
-\begin{frame}{Hands-On Tutorial: \texttt{amsc\_agentic\_workflows}}
+% ================================================================ IRI + MAG CODE EXAMPLES
+\begin{frame}[fragile]{Examples of using IRI + MAG \small(code borrowed from Trinity)}
   \begin{columns}[T,totalwidth=\textwidth]
-    \begin{column}{0.33\textwidth}
-      \begin{featbox}{accentblue}{\faLaptop\ Part 1 — Fundamentals}
-        \vspace{4pt}
-        Setup Claude + MAG\\[6pt]
-        Run a simple simulation
-      \end{featbox}
+    \begin{column}{0.5\textwidth}
+      \noindent\tikz[baseline]{\node[fill=accentteal, text=white, rounded corners=2pt,
+        inner sep=2pt, font=\bfseries\tiny\ttfamily] {\faBrain\ MAG --- call a model (OpenAI-compatible)};}\par\vspace{2pt}
+      \begin{lstlisting}[style=pysnip]
+from openai import OpenAI
+mag = OpenAI(base_url=MAG_URL,
+             api_key=os.environ["MAG_TOKEN"])
+reply = mag.chat.completions.create(
+    model="argo/claude-opus-4-8",
+    messages=[{"role": "user",
+               "content": prompt}])
+      \end{lstlisting}
+      \vspace{2pt}
+      {\scriptsize\color{midgray} One gateway, one token --- swap the
+      \texttt{model=} to reach any approved backend.}
     \end{column}
-    \begin{column}{0.33\textwidth}
-      \begin{featbox}{accentteal}{\faServer\ Part 2 — Native on HPC}
-        \vspace{4pt}
-        Running simulation on\\[4pt]
-        Polaris · Perlmutter · Frontier
-      \end{featbox}
-    \end{column}
-    \begin{column}{0.33\textwidth}
-      \begin{featbox}{accentgold}{\faGlobe\ Part 3 — Via IRI}
-        \vspace{4pt}
-        Job submission\\[6pt]
-        Data movement
-      \end{featbox}
+    \begin{column}{0.5\textwidth}
+      \noindent\tikz[baseline]{\node[fill=accentblue, text=white, rounded corners=2pt,
+        inner sep=2pt, font=\bfseries\tiny\ttfamily] {\faServer\ IRI --- submit \& monitor a job};}\par\vspace{2pt}
+      \begin{lstlisting}[style=pysnip]
+BASE = "https://api.alcf.anl.gov/api/v1"
+h = {"Authorization":
+     f"Bearer {os.environ['ALCF_IRI_TOKEN']}"}
+job = httpx.post(f"{BASE}/jobs/polaris",
+    headers=h, json=job_spec).json()
+state = httpx.get(
+    f"{BASE}/jobs/polaris/{job['id']}",
+    headers=h).json()["state"]
+      \end{lstlisting}
+      \vspace{2pt}
+      {\scriptsize\color{midgray} Same REST surface at ALCF, NERSC, and
+      OLCF --- only the \texttt{BASE} URL changes.}
     \end{column}
   \end{columns}
-  \vspace{8pt}
+  \vspace{6pt}
   \begin{center}
     {\footnotesize\color{midgray}
-      \faGithub\ \href{https://github.com/zhenghh04/amsc_agentic_ai}{github.com/zhenghh04/amsc\_agentic\_ai}}
+      \faLightbulb\ The agent chains these: MAG reasons about the request,
+      IRI executes it on HPC.}
   \end{center}
 \end{frame}
 
@@ -456,6 +541,116 @@
       \vspace{4pt}
       {\footnotesize\color{midgray}
         The scientist still owns the science. The infrastructure handles the rest.}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{How Trinity uses IRI + MAG}
+  \trinitymark
+  \begin{columns}[T,totalwidth=\textwidth]
+    \begin{column}{0.33\textwidth}
+      \begin{featbox}{accentblue}{\faLaptop\ Part 1 — Fundamentals}
+        \vspace{4pt}
+        Setup Claude + MAG\\[6pt]
+        Run a simple simulation
+      \end{featbox}
+    \end{column}
+    \begin{column}{0.33\textwidth}
+      \begin{featbox}{accentteal}{\faServer\ Part 2 — Native on HPC}
+        \vspace{4pt}
+        Running simulation on\\[4pt]
+        Polaris · Perlmutter · Frontier
+      \end{featbox}
+    \end{column}
+    \begin{column}{0.33\textwidth}
+      \begin{featbox}{accentgold}{\faGlobe\ Part 3 — Via IRI}
+        \vspace{4pt}
+        Job submission\\[6pt]
+        Data movement
+      \end{featbox}
+    \end{column}
+  \end{columns}
+  \vspace{8pt}
+  \begin{center}
+    {\footnotesize\color{midgray}
+      Minimal tutorial examples show how Trinity uses IRI + MAG:\\[3pt]
+      \faGithub\ \href{https://github.com/zhenghh04/amsc_agentic_ai}{github.com/zhenghh04/amsc\_agentic\_ai}}
+  \end{center}
+\end{frame}
+
+% ================================================================ MAG SETUP
+\begin{frame}[fragile]{Setup MAG for model access}
+  \trinitymark
+  \begin{columns}[T,totalwidth=\textwidth]
+    \begin{column}{0.5\textwidth}
+      \small
+      {\bfseries\color{labnavy}\faKey\ Three steps to a working token}\\[6pt]
+      \begin{enumerate}\setlength\itemsep{6pt}
+        \item[\textbf{1.}] \textbf{Request access} to the gateway\\
+          {\scriptsize\color{midgray}\href{https://amsc-docs-d762d2.gitlab.io/GM-getting-started/\#access--login}{amsc-docs\ldots/GM-getting-started \#access--login}}
+        \item[\textbf{2.}] \textbf{Generate a token} once approved\\
+          {\scriptsize\color{midgray}\href{https://amsc-docs-d762d2.gitlab.io/model-access-gateway/\#quick-start}{amsc-docs\ldots/model-access-gateway \#quick-start}}
+        \item[\textbf{3.}] \textbf{Export it} into your environment
+      \end{enumerate}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \noindent\tikz[baseline]{\node[fill=accentteal, text=white, rounded corners=2pt,
+        inner sep=2pt, font=\bfseries\tiny\ttfamily] {\faFileCode\ \textasciitilde/.claude/settings.json};}\par\vspace{2pt}
+      \begin{lstlisting}[style=shell,numbers=none]
+{
+  "env": {
+    "ANTHROPIC_BASE_URL":
+      "https://i2-api.genesis.american-science-cloud.org",
+    "ANTHROPIC_AUTH_TOKEN": "<your-MAG-PAT>",
+    "ANTHROPIC_MODEL": "claude-sonnet-4-6",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-4-6",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-6"
+  }
+}
+      \end{lstlisting}
+    \end{column}
+  \end{columns}
+  \vspace{4pt}
+  \begin{center}
+    {\footnotesize\color{midgray}
+      \faLightbulb\ Redirect Claude Code's API to MAG --- the PAT \emph{is} the auth; no key helper needed.}
+  \end{center}
+\end{frame}
+
+% ================================================================ FASTMCP SERVERS
+\begin{frame}[fragile]{FastMCP servers in Trinity}
+  \trinitymark
+  \begin{columns}[T,totalwidth=\textwidth]
+    \begin{column}{0.52\textwidth}
+      \noindent\tikz[baseline]{\node[fill=labnavy, text=white, rounded corners=2pt,
+        inner sep=2pt, font=\bfseries\tiny\ttfamily] {\faFolderOpen\ mcp/};}\par\vspace{2pt}
+      \begin{lstlisting}[style=treesnip]
+mcp/
+|-- context_utils.py
+|-- trinity_env.py
+`-- hpc/
+    |-- alcf_server.py
+    |-- alcf_iri_client.py
+    |-- nersc_server.py
+    |-- nersc_iri_client.py
+    |-- olcf_iri_server.py
+    `-- olcf_iri_client.py
+      \end{lstlisting}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \noindent\tikz[baseline]{\node[fill=accentteal, text=white, rounded corners=2pt,
+        inner sep=2pt, font=\bfseries\tiny\ttfamily] {\faFolderOpen\ scripts/};}\par\vspace{2pt}
+      \begin{lstlisting}[style=treesnip]
+scripts/
+`-- auth/
+    |-- alcf_iri_token.py
+    |-- nersc_iri_token.py
+    `-- globus_auth.py
+      \end{lstlisting}
+      \vspace{4pt}
+      {\scriptsize\color{midgray}
+        One FastMCP server per facility (\texttt{*\_server.py}) wraps a thin IRI
+        client (\texttt{*\_client.py}); \texttt{scripts/auth/} mints the tokens.}
     \end{column}
   \end{columns}
 \end{frame}
