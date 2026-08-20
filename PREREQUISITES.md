@@ -98,6 +98,52 @@ The `olcf-iri` server re-reads `.env` on every call, so a refreshed token is
 picked up without a restart. OLCF's IRI enclave has **no filesystem API** — file
 moves on Frontier go through **Globus** (the shared token from Step 2 above).
 
+## 2b. Your personal Globus endpoint (for laptop ↔ facility transfers)
+
+To transfer files **to or from your own laptop or workstation** you need a
+**Globus Connect Personal (GCP)** endpoint running on that machine. Skip this
+sub-step if you only need facility-to-facility transfers (Step 4 of Lab 09
+covers that alternative).
+
+### Install Globus Connect Personal
+
+1. Go to <https://www.globus.org/globus-connect-personal> and download the
+   installer for your OS (macOS, Windows, or Linux).
+2. Install and launch it. During setup, sign in with your Globus identity (the
+   same one you used in Step 2).
+3. GCP writes your personal endpoint UUID into
+   `~/.globusonline/lta/client-id.txt`. The transfer server reads that file
+   automatically — **no `.env` edit is needed** as long as GCP is installed.
+
+### Find your personal endpoint UUID (optional)
+
+The tools discover your UUID automatically from GCP's local config file. If you
+ever need the UUID directly (e.g. to share your endpoint, or to override the
+auto-discovery):
+
+```bash
+cat ~/.globusonline/lta/client-id.txt
+```
+
+Or open the **Globus web app** at <https://app.globus.org> → *Collections* →
+*Your Collections* — it is listed there.
+
+### Override (advanced)
+
+If you are running the tutorial on a cluster login node without GCP installed —
+or want to explicitly pin a particular collection — set the env var in `.env`:
+
+```bash
+echo "LOCAL_GLOBUS_ENDPOINT=<your-uuid>" >> .env
+```
+
+The server checks this var first, then falls back to the GCP config file, then
+raises a clear error if neither is present.
+
+> **GCP must be running** when a transfer involves your laptop. Globus can only
+> reach your machine when GCP is active (the tray icon is running). Transfers to
+> facility-to-facility paths work regardless.
+
 ## 3. The IRI MCP servers, configured in Claude Code
 
 This is the new piece. In [Lab 02](part1_fundamentals/02_mcp_and_tools.md) you

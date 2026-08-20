@@ -77,13 +77,34 @@ before you submit a job that depends on it.
 
 ## Step 4 — Pull a result back, and move between facilities
 
+### Before you start: personal endpoint setup
+
+To pull data **to your laptop** you need Globus Connect Personal (GCP) running
+locally. If you haven't done this yet:
+
+1. Download and install GCP from <https://www.globus.org/globus-connect-personal>.
+2. Launch it and sign in with your Globus identity.
+3. That's it — your UUID is written to `~/.globusonline/lta/client-id.txt` and
+   the transfer tool discovers it automatically. You can confirm it with:
+
+   ```bash
+   cat ~/.globusonline/lta/client-id.txt
+   ```
+
+4. Make sure GCP is running (tray icon active) before the transfer starts.
+
+Full details and the override option are in
+[PREREQUISITES.md § 2b](../PREREQUISITES.md#2b-your-personal-globus-endpoint-for-laptop--facility-transfers).
+
+**No laptop / headless environment?** Skip the laptop pull and do the
+facility-to-facility variant below instead — the workflow is identical.
+
+---
+
 Use an output from Lab 08 (or make a small file), then:
 
 > Transfer `<facility path>/<result>` back to `<local path>` and let me know when
 > it's done.
-
-(To reach your laptop you need a Globus Connect Personal endpoint; if you don't
-have one, transfer between two facility paths instead — identical workflow.)
 
 Then the multi-facility move (if you have two facilities):
 
