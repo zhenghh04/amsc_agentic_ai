@@ -38,8 +38,6 @@ AUTH_CLIENT_ID = "fae5c579-490a-4d76-b6eb-d78f65caeb63"
 SCOPE_CLIENT_ID = "ed3e577d-f7f3-4639-b96e-ff5a8445d699"
 SCOPE_STRING = f"https://auth.globus.org/scopes/{SCOPE_CLIENT_ID}/iri_api"
 AUTH_SCOPES = ["openid", "profile", "email", "urn:globus:auth:scope:auth.globus.org:view_identities"]
-TOKENS_PATH = pathlib.Path.home() / ".globus" / "app" / AUTH_CLIENT_ID / APP_NAME / "tokens.json"
-
 # Credentials .env file. Resolve like the MCP servers (mcp/trinity_env.py) so a
 # refreshed token lands in the SAME store the nersc-iri server reads:
 #   1. $TRINITY_ENV_DIR/.env   — per-user store (Trinity multi-tenant / local switch)
@@ -56,14 +54,28 @@ def _resolve_env_file() -> pathlib.Path:
     return pathlib.Path(__file__).resolve().parent.parent.parent / ".env"
 
 ENV_FILE = _resolve_env_file()
+REFRESH_VAR = "NERSC_IRI_REFRESH_TOKEN"
+EXPIRES_VAR = "NERSC_IRI_EXPIRES_AT"
+
+
+def _remove_env_keys(keys: list[str]) -> None:
+    """Remove key=value lines (and their timestamp comments) from .env."""
+    if not ENV_FILE.exists():
+        return
+    remove_prefixes = tuple(
+        p
+        for key in keys
+        for p in (f"#{key} updated:", f"{key}=", f"export {key}=")
+    )
+    lines = [
+        line for line in ENV_FILE.read_text().splitlines()
+        if not any(line.lstrip().startswith(p) for p in remove_prefixes)
+    ]
+    ENV_FILE.write_text("\n".join(lines) + "\n")
 
 
 class NERSCAuthError(Exception):
     """Raised when authentication state is missing or invalid."""
-
-
-def _ensure_token_dir() -> None:
-    TOKENS_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 
 def _build_client() -> globus_sdk.NativeAppAuthClient:
@@ -103,16 +115,33 @@ def _extract_token_data(token_response: globus_sdk.OAuthTokenResponse) -> dict:
 
 
 def _save_token_data(token_data: dict) -> None:
-    _ensure_token_dir()
-    TOKENS_PATH.write_text(json.dumps(token_data, indent=2, sort_keys=True), encoding="utf-8")
+    _update_env("NERSC_IRI_TOKEN", token_data["access_token"])
+    if token_data.get("refresh_token"):
+        _update_env(REFRESH_VAR, token_data["refresh_token"])
+    if token_data.get("expires_at_seconds"):
+        _update_env(EXPIRES_VAR, str(int(token_data["expires_at_seconds"])))
 
 
 def _load_token_data() -> dict:
-    if not TOKENS_PATH.is_file():
+    data: dict = {}
+    if ENV_FILE.exists():
+        for line in ENV_FILE.read_text().splitlines():
+            for key, attr in [
+                ("NERSC_IRI_TOKEN", "access_token"),
+                (REFRESH_VAR, "refresh_token"),
+                (EXPIRES_VAR, "expires_at_seconds"),
+            ]:
+                if line.startswith(f"{key}=") or line.startswith(f"export {key}="):
+                    data[attr] = line.split("=", 1)[1].strip().strip('"').strip("'")
+                    break
+    if not data.get("access_token"):
         raise NERSCAuthError(
-            'No NERSC token found. Run "python scripts/nersc_iri_token.py authenticate" first.'
+            'No NERSC IRI token in .env. Run '
+            '"python scripts/auth/nersc_iri_token.py authenticate" first.'
         )
-    return json.loads(TOKENS_PATH.read_text(encoding="utf-8"))
+    if "expires_at_seconds" in data:
+        data["expires_at_seconds"] = float(data["expires_at_seconds"])
+    return data
 
 
 def _update_env(key: str, value: str) -> None:
@@ -179,8 +208,7 @@ def authenticate(force_reauth: bool = False) -> dict:
 
     expires = token_data.get("expires_at_seconds", 0)
     remaining = (expires - time.time()) / 3600
-    print(f"\nNERSC IRI token saved to {TOKENS_PATH}")
-    print(f"NERSC_IRI_TOKEN written to {ENV_FILE}")
+    print(f"\nNERSC_IRI_TOKEN saved to {ENV_FILE}")
     print(f"Expires in {remaining:.1f} hours")
     print(f"Token: {token[:20]}...")
     return token_data
@@ -222,11 +250,8 @@ def get_time_until_token_expiration(units: str = "seconds") -> float:
 
 
 def logout() -> None:
-    if not TOKENS_PATH.is_file():
-        print(f"No NERSC token file found at {TOKENS_PATH}")
-        return
-    TOKENS_PATH.unlink(missing_ok=True)
-    print(f"NERSC token removed: {TOKENS_PATH}")
+    _remove_env_keys(["NERSC_IRI_TOKEN", REFRESH_VAR, EXPIRES_VAR])
+    print(f"NERSC IRI tokens removed from {ENV_FILE}")
 
 
 def ensure_valid() -> bool:

@@ -13,7 +13,7 @@ Usage:
     python scripts/auth/globus_auth.py authenticate           # interactive browser login
     python scripts/auth/globus_auth.py get_url                # print auth URL (non-interactive, saves PKCE state)
     python scripts/auth/globus_auth.py exchange --code <CODE> # exchange code after get_url
-    python scripts/auth/globus_auth.py sync_env               # copy ~/.globus/tokens.json → .env (no re-auth)
+    python scripts/auth/globus_auth.py sync_env               # confirm tokens in .env and echo their keys
     python scripts/auth/globus_auth.py ensure_valid           # refresh if needed, then sync .env
     python scripts/auth/globus_auth.py status                 # show token expiry
     python scripts/auth/globus_auth.py logout                 # remove cached tokens
@@ -137,8 +137,6 @@ ENV_VAR_MAP = {
 # Inverse: label -> env var name
 _LABEL_TO_ENV = {v: k for k, v in ENV_VAR_MAP.items()}
 
-TOKEN_DIR = pathlib.Path.home() / ".globus"
-TOKEN_FILE = TOKEN_DIR / "tokens.json"
 PKCE_STATE_FILE = pathlib.Path("/tmp/globus_pkce_state.json")
 
 # Project .env file
@@ -163,22 +161,6 @@ _INFERENCE_TOKEN_SCRIPT = _AUTH_DIR / "inference_auth_token.py"
 # Facility-specific Globus Compute token scripts
 _OLCF_GC_TOKEN_SCRIPT = _AUTH_DIR / "olcf_gc_token.py"
 _NERSC_GC_TOKEN_SCRIPT = _AUTH_DIR / "nersc_gc_token.py"
-
-
-# ── Token Storage ────────────────────────────────────────────────────
-
-
-def _save_tokens(token_data: dict) -> None:
-    """Save token data (keyed by resource server) to disk."""
-    TOKEN_DIR.mkdir(parents=True, exist_ok=True)
-    TOKEN_FILE.write_text(json.dumps(token_data, indent=2))
-
-
-def _load_tokens() -> dict | None:
-    """Load token data from disk.  Returns None if no file exists."""
-    if TOKEN_FILE.exists():
-        return json.loads(TOKEN_FILE.read_text())
-    return None
 
 
 # ── .env Helpers ─────────────────────────────────────────────────────
@@ -214,13 +196,65 @@ def _update_env(key: str, value: str) -> None:
     ENV_FILE.write_text("\n".join(lines) + "\n")
 
 
+def _remove_env_keys(keys: list[str]) -> None:
+    """Remove key=value lines (and their timestamp comments) from .env."""
+    if not ENV_FILE.exists():
+        return
+    remove_prefixes = tuple(
+        p
+        for key in keys
+        for p in (f"#{key} updated:", f"{key}=", f"export {key}=")
+    )
+    lines = [
+        line for line in ENV_FILE.read_text().splitlines()
+        if not any(line.lstrip().startswith(p) for p in remove_prefixes)
+    ]
+    ENV_FILE.write_text("\n".join(lines) + "\n")
+
+
+def _load_tokens() -> dict | None:
+    """Load token data from .env.  Returns None if no tokens found."""
+    if not ENV_FILE.exists():
+        return None
+    env_lines = ENV_FILE.read_text().splitlines()
+
+    def _env_val(key: str) -> str:
+        for line in env_lines:
+            if line.startswith(f"{key}=") or line.startswith(f"export {key}="):
+                return line.split("=", 1)[1].strip().strip('"').strip("'")
+        return ""
+
+    token_data: dict = {}
+    for label, rs_key in RESOURCE_SERVERS.items():
+        env_var = _LABEL_TO_ENV.get(label, "")
+        if not env_var:
+            continue
+        access_token = _env_val(env_var)
+        if not access_token:
+            continue
+        refresh_token = _env_val(env_var + "_REFRESH")
+        expires_at_str = _env_val(env_var + "_EXPIRES_AT")
+        token_data[rs_key] = {
+            "access_token": access_token,
+            "refresh_token": refresh_token or None,
+            "expires_at_seconds": float(expires_at_str) if expires_at_str else 0.0,
+            "token_type": "Bearer",
+        }
+    return token_data if token_data else None
+
+
 def _write_all_to_env(data: dict) -> None:
     """Write all tokens to .env.  *data* is keyed by label (transfer/compute)."""
     for label, token_info in data.items():
         env_var = _LABEL_TO_ENV.get(label)
-        if env_var and "access_token" in token_info:
-            _update_env(env_var, token_info["access_token"])
-            os.environ[env_var] = token_info["access_token"]
+        if not env_var or "access_token" not in token_info:
+            continue
+        _update_env(env_var, token_info["access_token"])
+        os.environ[env_var] = token_info["access_token"]
+        if token_info.get("refresh_token"):
+            _update_env(env_var + "_REFRESH", token_info["refresh_token"])
+        if token_info.get("expires_at_seconds"):
+            _update_env(env_var + "_EXPIRES_AT", str(int(token_info["expires_at_seconds"])))
 
 
 # ── IRI Token Delegation ────────────────────────────────────────────
@@ -458,7 +492,7 @@ def _get_delegated_expiry(script: pathlib.Path) -> str:
     directly rather than calling a subcommand, since olcf/nersc_gc_token.py
     don't expose get_time_until_token_expiration.
     """
-    stem = script.stem  # e.g. "olcf_gc_token" → "olcf_gc_tokens"
+    stem = script.stem
     token_file = pathlib.Path.home() / ".globus" / f"{stem.replace('_token', '_tokens')}.json"
     if not token_file.exists():
         return ""
@@ -483,7 +517,7 @@ def _print_all_tokens() -> None:
     """
     print("\n=== Tokens ===")
 
-    # Globus Transfer + Compute (loaded from local cache).
+    # Globus Transfer + Compute (loaded from .env).
     token_data = _load_tokens() or {}
     for label, rs_key in RESOURCE_SERVERS.items():
         token = token_data.get(rs_key, {}).get("access_token", "")
@@ -592,16 +626,13 @@ def authenticate(*, include_data_access: bool = False) -> dict | None:
         print("Available resource servers:", list(by_rs.keys()))
         return None
 
-    _save_tokens(token_data)
-
-    # Write to .env
     label_data = {}
     for label, rs_key in RESOURCE_SERVERS.items():
         if rs_key in token_data:
             label_data[label] = token_data[rs_key]
     _write_all_to_env(label_data)
 
-    print(f"Globus Transfer/Compute tokens saved to {TOKEN_FILE}")
+    print(f"Globus Transfer/Compute tokens saved to {ENV_FILE}")
 
     # Force a fresh interactive login for every other token we manage so
     # `authenticate` always returns a complete, freshly-issued token set.
@@ -671,7 +702,6 @@ def ensure_valid() -> bool:
                         "token_type": refreshed.get("token_type", "Bearer"),
                     }
 
-            _save_tokens(token_data)
         except Exception as exc:
             print(f"Token refresh failed: {exc}")
             return False
@@ -701,7 +731,7 @@ def status() -> None:
     print("=== Globus Token Status ===\n")
 
     if not token_data:
-        print("No Globus tokens found. Run: python scripts/auth/globus_auth.py authenticate")
+        print(f"No Globus tokens found in {ENV_FILE}. Run: python scripts/auth/globus_auth.py authenticate")
     else:
         for label, rs_key in RESOURCE_SERVERS.items():
             rs_data = token_data.get(rs_key, {})
@@ -761,12 +791,12 @@ def status() -> None:
 
 
 def logout() -> None:
-    """Remove cached Globus tokens."""
-    if TOKEN_FILE.exists():
-        TOKEN_FILE.unlink()
-        print(f"Globus tokens removed: {TOKEN_FILE}")
-    else:
-        print("No Globus tokens to remove.")
+    """Remove Globus Transfer/Compute tokens from .env."""
+    keys: list[str] = []
+    for env_var in ENV_VAR_MAP:
+        keys += [env_var, env_var + "_REFRESH", env_var + "_EXPIRES_AT"]
+    _remove_env_keys(keys)
+    print(f"Globus Transfer/Compute tokens removed from {ENV_FILE}")
 
 
 DEFAULT_SESSION_DOMAIN = "sso.ccs.ornl.gov"
@@ -855,8 +885,6 @@ def exchange(auth_code: str) -> dict | None:
         rs = other.get("resource_server", "unknown")
         token_data[rs] = _entry(other)
 
-    _save_tokens(token_data)
-
     label_data = {}
     for label, rs_key in RESOURCE_SERVERS.items():
         if rs_key in token_data:
@@ -865,7 +893,7 @@ def exchange(auth_code: str) -> dict | None:
 
     PKCE_STATE_FILE.unlink(missing_ok=True)
 
-    print(f"Tokens saved to {TOKEN_FILE}")
+    print(f"Tokens saved to {ENV_FILE}")
     for label, rs_key in RESOURCE_SERVERS.items():
         if rs_key in token_data:
             t = token_data[rs_key]["access_token"]
@@ -878,10 +906,10 @@ def exchange(auth_code: str) -> dict | None:
 
 
 def sync_env() -> bool:
-    """Copy current tokens from ~/.globus/tokens.json into .env without re-auth."""
+    """Confirm current tokens in .env are present and echo their keys."""
     token_data = _load_tokens()
     if not token_data:
-        print(f"No token file found at {TOKEN_FILE}. Run: python scripts/auth/globus_auth.py authenticate")
+        print(f"No Globus tokens found in {ENV_FILE}. Run: python scripts/auth/globus_auth.py authenticate")
         return False
 
     label_data = {}
@@ -895,7 +923,7 @@ def sync_env() -> bool:
         return False
 
     _write_all_to_env(label_data)
-    print(f"Updated {ENV_FILE}:")
+    print(f"Tokens confirmed in {ENV_FILE}:")
     for label, info in label_data.items():
         env_var = _LABEL_TO_ENV.get(label, label)
         token_preview = info["access_token"][:20] + "..."

@@ -50,8 +50,6 @@ AUTH_CLIENT_ID = "fae5c579-490a-4d76-b6eb-d78f65caeb63"
 SCOPE_CLIENT_ID = "6be511f6-a071-471f-9bc0-02a0d0836723"
 SCOPE_STRING = f"https://auth.globus.org/scopes/{SCOPE_CLIENT_ID}/filesystem"
 AUTH_SCOPES = ["openid", "profile", "email"]
-TOKENS_PATH = pathlib.Path.home() / ".globus" / "app" / AUTH_CLIENT_ID / APP_NAME / "tokens.json"
-
 # Project .env file
 def _resolve_env_file() -> pathlib.Path:
     """Credentials .env: $TRINITY_ENV_DIR/.env → $CLAUDE_ENV_FILE → repo-root/.env.
@@ -69,6 +67,8 @@ def _resolve_env_file() -> pathlib.Path:
 
 ENV_FILE = _resolve_env_file()
 ENV_VAR = "ALCF_IRI_TOKEN"
+REFRESH_VAR = "ALCF_IRI_REFRESH_TOKEN"
+EXPIRES_VAR = "ALCF_IRI_EXPIRES_AT"
 
 
 def _update_env(key: str, value: str) -> None:
@@ -95,6 +95,24 @@ def _update_env(key: str, value: str) -> None:
         lines.append(timestamp_line)
         lines.append(f"{key}={value}")
     ENV_FILE.write_text("\n".join(lines) + "\n")
+
+
+def _remove_env_keys(keys: list[str]) -> None:
+    """Remove key=value lines (and their timestamp comments) from .env."""
+    if not ENV_FILE.exists():
+        return
+    remove_prefixes = tuple(
+        p
+        for key in keys
+        for p in (f"#{key} updated:", f"{key}=", f"export {key}=")
+    )
+    lines = [
+        line for line in ENV_FILE.read_text().splitlines()
+        if not any(line.lstrip().startswith(p) for p in remove_prefixes)
+    ]
+    ENV_FILE.write_text("\n".join(lines) + "\n")
+
+
 SESSION_REQUIRED_POLICIES: list[str] = []  # relaxed 2026-05: no longer required
 TOKEN_PAGE_TIMEOUT_SECONDS = 3600
 POST_LOGOUT_HOLD_SECONDS = 5
@@ -154,7 +172,8 @@ class _TokenPageHandler(BaseHTTPRequestHandler):
             self.end_headers()
             return
 
-        TOKENS_PATH.unlink(missing_ok=True)
+        self.server.html_state["logged_out"] = True
+        _remove_env_keys([ENV_VAR, REFRESH_VAR, EXPIRES_VAR])
         self.server.html_state["html"] = _build_logged_out_html()
         self.server.html_state["hold_until"] = time.time() + POST_LOGOUT_HOLD_SECONDS
         body = json.dumps({"ok": True}).encode("utf-8")
@@ -166,10 +185,6 @@ class _TokenPageHandler(BaseHTTPRequestHandler):
 
     def log_message(self, format: str, *args: object) -> None:
         return
-
-
-def _ensure_token_dir() -> None:
-    TOKENS_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 
 def _build_client() -> globus_sdk.NativeAppAuthClient:
@@ -241,17 +256,33 @@ def _extract_token_data(token_response: globus_sdk.OAuthTokenResponse) -> dict:
 
 
 def _save_token_data(token_data: dict) -> None:
-    _ensure_token_dir()
-    TOKENS_PATH.write_text(json.dumps(token_data, indent=2, sort_keys=True), encoding="utf-8")
+    _update_env(ENV_VAR, token_data["access_token"])
+    if token_data.get("refresh_token"):
+        _update_env(REFRESH_VAR, token_data["refresh_token"])
+    if token_data.get("expires_at_seconds"):
+        _update_env(EXPIRES_VAR, str(int(token_data["expires_at_seconds"])))
 
 
 def _load_token_data() -> dict:
-    if not TOKENS_PATH.is_file():
+    data: dict = {}
+    if ENV_FILE.exists():
+        for line in ENV_FILE.read_text().splitlines():
+            for key, attr in [
+                (ENV_VAR, "access_token"),
+                (REFRESH_VAR, "refresh_token"),
+                (EXPIRES_VAR, "expires_at_seconds"),
+            ]:
+                if line.startswith(f"{key}=") or line.startswith(f"export {key}="):
+                    data[attr] = line.split("=", 1)[1].strip().strip('"').strip("'")
+                    break
+    if not data.get("access_token"):
         raise FacilityAPIAuthError(
-            "Access token does not exist. Run "
+            'No ALCF IRI token in .env. Run '
             '"python3 alcf_iri_token.py authenticate" first.'
         )
-    return json.loads(TOKENS_PATH.read_text(encoding="utf-8"))
+    if "expires_at_seconds" in data:
+        data["expires_at_seconds"] = float(data["expires_at_seconds"])
+    return data
 
 
 def _build_waiting_html() -> str:
@@ -654,7 +685,7 @@ def _serve_token_page(
     try:
         while time.time() < deadline:
             hold_until = float(token_page_state.get("hold_until", 0.0))
-            if not TOKENS_PATH.exists() and time.time() >= hold_until:
+            if token_page_state.get("logged_out") and time.time() >= hold_until:
                 break
             time.sleep(0.5)
     except KeyboardInterrupt:
@@ -706,7 +737,7 @@ def authenticate(force_reauth: bool = False, **_legacy: object) -> dict:
     if not force_reauth:
         try:
             token_data = get_token_data(force_refresh=False)
-            print(f"Using existing token from {TOKENS_PATH}")
+            print(f"Using existing token from {ENV_FILE}")
             _emit_token(token_data)
             return token_data
         except FacilityAPIAuthError:
@@ -760,7 +791,7 @@ def authenticate(force_reauth: bool = False, **_legacy: object) -> dict:
     token_data = _extract_token_data(token_response)
     _save_token_data(token_data)
 
-    print(f"Stored tokens in {TOKENS_PATH}")
+    print(f"ALCF IRI tokens saved to {ENV_FILE}")
     _emit_token(token_data)
     return token_data
 
@@ -822,16 +853,11 @@ def get_time_until_token_expiration(units: str = "seconds") -> float:
 
 def logout() -> None:
     """
-    Remove the local token cache file. Remote revocation is intentionally not
-    attempted here because network/proxy issues can cause the call to hang and
-    prevent a user from clearing local auth state.
+    Remove ALCF IRI tokens from .env. Remote revocation is intentionally not
+    attempted here.
     """
-    if not TOKENS_PATH.is_file():
-        print(f"No token file found at {TOKENS_PATH}")
-        return
-
-    TOKENS_PATH.unlink(missing_ok=True)
-    print(f"Logged out and removed token cache: {TOKENS_PATH}")
+    _remove_env_keys([ENV_VAR, REFRESH_VAR, EXPIRES_VAR])
+    print(f"ALCF IRI tokens removed from {ENV_FILE}")
 
 
 def ensure_valid() -> bool:
