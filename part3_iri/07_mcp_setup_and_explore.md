@@ -14,14 +14,73 @@ This is also how you *verify* your setup works before it matters.
 
 ## Objectives
 
-1. Confirm the bundled `alcf-iri`, `nersc-iri`, and `olcf-iri` servers are
+1. Authenticate to the IRI APIs and Globus Transfer for each facility you use.
+2. Confirm the bundled `alcf-iri`, `nersc-iri`, and `olcf-iri` servers are
    connected and their tools available.
-2. Read live status for Polaris, Perlmutter, and Frontier through the agent.
-3. Find **your** allocations and the account name you'll submit against, per
+3. Read live status for Polaris, Perlmutter, and Frontier through the agent.
+4. Find **your** allocations and the account name you'll submit against, per
    facility.
-4. Look at your directories on the facilities you have — without leaving the editor.
+5. Look at your directories on the facilities you have — without leaving the editor.
 
-## Step 1 — Confirm the connections
+## Step 1 — Authenticate
+
+Run the auth scripts for each facility you have an account on. All commands are
+run from inside `amsc_agentic_ai/` with your virtual environment active.
+
+### ALCF / Polaris — IRI token (browser Globus login)
+
+```bash
+python scripts/auth/alcf_iri_token.py authenticate
+```
+
+A browser window opens at `auth.globus.org`. Log in with your ALCF Globus
+identity, grant the requested scopes, and the script writes `ALCF_IRI_TOKEN` to
+`amsc_agentic_ai/.env`. Over SSH (no browser)? It prints a URL — open it on
+any machine, paste back the code.
+
+### NERSC / Perlmutter — IRI token (Globus, must use nersc.gov identity)
+
+```bash
+python scripts/auth/nersc_iri_token.py authenticate
+```
+
+Same browser flow, but Globus will prompt you to link a `nersc.gov` identity if
+you haven't already. Writes `NERSC_IRI_TOKEN` to `.env`.
+
+### OLCF / Frontier — manually issued API token
+
+OLCF does not use a browser flow. Mint a token in the portal and paste it in:
+
+1. Go to <https://my.olcf.ornl.gov> → *Projects* → **API Tokens**.
+2. Generate a token **with the compute scope** (without it, status calls work
+   but job submission returns HTTP 401).
+3. Add it to `.env`:
+   ```bash
+   echo "OLCF_IRI_TOKEN=<paste-the-token>" >> .env
+   ```
+
+### Globus Transfer — move data to/from any facility
+
+```bash
+python scripts/auth/globus_auth.py authenticate
+```
+
+Writes `GLOBUS_TRANSFER_TOKEN` (and mirrors the IRI tokens into `.env` if they
+are fresher). Check status any time with:
+
+```bash
+python scripts/auth/globus_auth.py status
+```
+
+> **Tokens refresh automatically.** Each MCP server re-reads `.env` on every
+> call, so a token rotated by the auth script is picked up immediately — no
+> server restart needed.
+
+> **Only do the facility/facilities you have.** A server whose token you haven't
+> set simply reports "not authenticated" — it does not block the servers for
+> your other facilities.
+
+## Step 2 — Confirm the connections
 
 Inside `claude` (launched from `amsc_agentic_ai/`):
 
@@ -31,12 +90,11 @@ Inside `claude` (launched from `amsc_agentic_ai/`):
 
 You should see **alcf-iri**, **nersc-iri**, and **olcf-iri**, each with tools
 including `list_resources`, `get_system_status`, `list_projects`, `submit_job`,
-`get_job_status`. If one is missing, most likely `claude` wasn't launched from
-inside `amsc_agentic_ai/` (where `.mcp.json` lives). A server that *shows* but
-says "not authenticated" just means you haven't set that facility's token — fine
-if you don't use it.
+`get_job_status`. If one is missing, `claude` was likely not launched from
+inside `amsc_agentic_ai/` (where `.mcp.json` lives). A server that shows but
+says "not authenticated" means Step 1 hasn't been run for that facility yet.
 
-## Step 2 — Read status across all three facilities
+## Step 3 — Read status across all three facilities
 
 > What's up right now at ALCF, NERSC, and OLCF? For each, give me the system
 > status (Polaris, Perlmutter, Frontier) and note any outages or maintenance.
@@ -49,7 +107,7 @@ answer — but the "tools" now reach three facilities' live status APIs. You're
 looking at three machine rooms from one editor. Notice the agent picks the right
 server per system without you naming it.
 
-## Step 3 — Find your allocation on each facility
+## Step 4 — Find your allocation on each facility
 
 You can't submit without knowing which **account** to charge. Ask:
 
@@ -68,7 +126,7 @@ account name — have the agent read it.
 > your `OLCF_IRI_TOKEN` was issued **without the compute scope** — re-mint it from
 > myOLCF with compute enabled (see [PREREQUISITES.md](../PREREQUISITES.md#olcf--frontier--a-manually-issued-api-token)).
 
-## Step 4 — Look around your filesystems
+## Step 5 — Look around your filesystems
 
 > List my home directory on Polaris and my scratch/project space, and do the same
 > for any of Perlmutter or Frontier I'm set up for. Just show me what's there —
@@ -92,6 +150,8 @@ facilities. In Lab 09 you'll *move* data; today you're just reading.
 
 ## ✅ Checkpoint
 
+- [ ] Auth scripts ran without error for each facility you use; tokens are in `.env`.
+- [ ] `python scripts/auth/globus_auth.py status` shows valid Globus Transfer credentials.
 - [ ] `/mcp` shows `alcf-iri`, `nersc-iri`, and `olcf-iri` (authenticated for the
       facilities you use).
 - [ ] The agent reported live status for at least one of Polaris / Perlmutter /
