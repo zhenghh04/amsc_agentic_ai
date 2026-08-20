@@ -2,10 +2,15 @@
   <img src="assets/trinity-logo.svg" alt="Trinity Science" width="72" height="72">
 </p>
 
-# Hands-On: Agentic AI for AmSC
+# Minimal Examples: Using MAG and IRI for Agentic Workflows
 
 *Author: Huihuo Zheng, huihuo.zheng@anl.gov*<br>
 *August 2026*
+
+> **These minimal examples are extracted from Trinity — an Agentic AI Platform for Autonomous HPC.**
+> They distill the core patterns Trinity uses to drive agents against the **AmSC
+> Model Access Gateway (MAG)** and the **Integrated Research Infrastructure (IRI)**,
+> stripped down to the smallest self-contained form you can run and learn from.
 
 A hands-on tutorial for getting started with **agentic AI** as an AmSC
 (American Science Cloud) user. You'll set up an AI coding agent — **Claude Code**,
