@@ -111,22 +111,20 @@ covers that alternative).
    installer for your OS (macOS, Windows, or Linux).
 2. Install and launch it. During setup, sign in with your Globus identity (the
    same one you used in Step 2).
-3. GCP writes your personal endpoint UUID into
-   `~/.globusonline/lta/client-id.txt`. The transfer server reads that file
+3. GCP records your personal endpoint UUID in a local config file (the exact
+   path varies by OS — macOS/Linux: `~/.globusonline/lta/client-id.txt`;
+   Windows: `%APPDATA%\Globus Connect Personal\`). The Globus SDK discovers it
    automatically — **no `.env` edit is needed** as long as GCP is installed.
 
 ### Find your personal endpoint UUID (optional)
 
-The tools discover your UUID automatically from GCP's local config file. If you
-ever need the UUID directly (e.g. to share your endpoint, or to override the
-auto-discovery):
+The tools auto-discover your UUID via the Globus SDK (it handles the
+OS-specific path). If you ever need the UUID directly:
 
-```bash
-cat ~/.globusonline/lta/client-id.txt
-```
-
-Or open the **Globus web app** at <https://app.globus.org> → *Collections* →
-*Your Collections* — it is listed there.
+- **macOS/Linux:** `cat ~/.globusonline/lta/client-id.txt`
+- **Windows:** open `%APPDATA%\Globus Connect Personal\` in Explorer
+- **Any OS:** open <https://app.globus.org> → *Collections* → *Your
+  Collections* — it is listed there
 
 ### Override (advanced)
 
