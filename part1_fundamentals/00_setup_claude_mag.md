@@ -125,6 +125,9 @@ VS Code without admin is covered in [Appendix A](#appendix-a--using-vs-code-opti
 
 ## Step 2 — Get a MAG Personal Access Token
 
+0. **Request access to MAG first** (if you don't already have it): follow the
+   getting-started guide at
+   <https://amsc-docs-d762d2.gitlab.io/GM-getting-started/#access--login>.
 1. Open the MAG portal: <https://portal-lite.genesis.american-science-cloud.org/>
 2. Log in and **select an approved AmSC Genesis Mission RFA project** (your usage
    is billed to it).
