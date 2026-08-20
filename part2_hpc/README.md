@@ -24,7 +24,7 @@ way you would by hand.
 
 | Lab | Title | Time | Approx cost |
 | --- | --- | --- | --- |
-| [05](05_native_on_your_system.md) | Run Claude natively on your system + a first job | 35–50 min | ~1 node-minute |
+| [05](05_hpc_uan.md) | Run Claude natively on your system + a first job | 35–50 min | ~1 node-minute |
 
 ## Pick one system
 
@@ -85,7 +85,7 @@ fixed, named, auditable set of tool calls — across all three systems.
 The trade-off between shell-based and MCP-based access — neither is "more
 correct," and nothing stops you from doing both.
 
-Start with [Lab 05 — Run Claude natively on your system](05_native_on_your_system.md).
+Start with [Lab 05 — Run Claude natively on your system](05_hpc_uan.md).
 
 ---
 

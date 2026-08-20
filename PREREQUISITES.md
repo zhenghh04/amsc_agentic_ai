@@ -3,7 +3,7 @@
 This file is for **Part 3** — the local-laptop-plus-MCP-server way of reaching
 Polaris, Perlmutter, and Frontier ([part3_iri/README.md](part3_iri/README.md)
 has the full intro). If you're doing **Part 2** (running `claude` directly on a
-login node) instead, skip this file entirely — [Lab 05](part2_hpc/05_native_on_your_system.md)
+login node) instead, skip this file entirely — [Lab 05](part2_hpc/05_hpc_uan.md)
 states its own, much lighter prerequisite (just an interactive account on one
 system).
 

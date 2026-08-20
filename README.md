@@ -89,7 +89,7 @@ tunnel required. See [part2_hpc/README.md](part2_hpc/README.md) for the full int
 
 | Lab | Title | Time | Approx cost |
 | --- | --- | --- | --- |
-| [05](part2_hpc/05_native_on_your_system.md) | Run Claude natively on your system + a first job | 35–50 min | ~1 node-min |
+| [05](part2_hpc/05_hpc_uan.md) | Run Claude natively on your system + a first job | 35–50 min | ~1 node-min |
 
 ## Part 3 — Orchestrating Job Submission via IRI (all three facilities)
 
