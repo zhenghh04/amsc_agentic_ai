@@ -3,7 +3,7 @@
 > **Part 1 · Fundamentals · ~30–40 min · No HPC allocation required**
 >
 > Prereq: [Lab 01](01_local_simulation.md). Helpful:
-> [Lab 02](03_local_training.md) (the training half of the ML story).
+> [Lab 02](02_local_training.md) (the training half of the ML story).
 
 The last workload of the spine is **inference** — using a trained model to make
 predictions, and measuring how fast. You'll run inference two ways: as a **call to
@@ -13,7 +13,7 @@ but the loop is identical.
 
 > Two flavors of "inference" show up in practice, and this lab touches both:
 > **(a)** calling a hosted LLM through MAG (no GPU, no model to manage), and
-> **(b)** running your *own* model locally (the classifier you trained in Lab 03,
+> **(b)** running your *own* model locally (the classifier you trained in Lab 02,
 > or a small downloaded model). Do (a) for sure; do (b) if you have the packages.
 
 ---
@@ -32,7 +32,7 @@ but the loop is identical.
 ## Concepts (30 seconds)
 
 - **Inference** = a forward pass through a trained model: text in → text out for
-  an LLM, image in → label out for the Lab 03 classifier.
+  an LLM, image in → label out for the Lab 02 classifier.
 - **Two roles for MAG.** Claude Code (the *agent*) already talks to MAG — that's
   how it thinks. A *task* you write can *also* call MAG as a plain HTTP endpoint.
   Those are independent: the task needs its own token in its own environment.
@@ -68,14 +68,14 @@ script only sees what's in its environment.
 ## Step 2 — Local inference with your own model
 
 Point inference at a model *you* control — the classifier from
-[Lab 03](03_training.md) is perfect:
+[Lab 02](02_local_training.md) is perfect:
 
-> Load the model I trained in Lab 03 (`train.py` / its saved checkpoint) and run
+> Load the model I trained in Lab 02 (`train.py` / its saved checkpoint) and run
 > inference on 100 test images. Report the accuracy, the average per-image latency
 > in milliseconds, and the throughput in images/second. Save the numbers to
 > `infer_metrics.json` and show me the real measurements.
 
-No Lab 03 checkpoint handy? Ask for a tiny downloaded model instead:
+No Lab 02 checkpoint handy? Ask for a tiny downloaded model instead:
 
 > Alternatively, download a very small text model from Hugging Face (well under
 > 1B params so it runs on CPU), run inference on a few prompts, and report latency
@@ -108,13 +108,13 @@ applied to performance.
 
 - [ ] `mag_infer.py` ran and returned a real model response with a timing.
 - [ ] You ran local inference and have measured latency + throughput in
-      `infer_metrics.json` (from your Lab 03 model or a small downloaded one).
+      `infer_metrics.json` (from your Lab 02 model or a small downloaded one).
 - [ ] You can explain the two roles of MAG (agent vs task) and why the task needs
       its own token.
 - [ ] The agent projected to a GPU *without* overclaiming an unmeasured speedup.
 
 🎉 **You've completed the spine on a laptop:** simulation (Lab 01), training
-(Lab 03), and inference (Lab 04) — plus the tool machinery underneath (Lab 02).
+(Lab 02), and inference (Lab 03).
 
 ---
 

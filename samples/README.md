@@ -5,7 +5,7 @@ Synthetic HPC job logs for the training lab. They're fabricated for teaching
 on DOE systems — one per facility. Use them if you don't have a failed log of
 your own handy.
 
-## Job failure logs — [Lab 03](../part1_fundamentals/03_local_training.md)
+## Job failure logs — [Lab 02](../part1_fundamentals/02_local_training.md)
 
 | File | System style | What fails | Root cause |
 | --- | --- | --- | --- |

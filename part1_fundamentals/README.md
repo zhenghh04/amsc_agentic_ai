@@ -10,8 +10,8 @@ learn the core ideas everything else builds on: **agents call tools**, and the
 | --- | --- | --- | --- |
 | [00](00_setup_claude_mag.md) | Set up Claude Code and MAG | 15–25 min | A laptop, a MAG Personal Access Token |
 | [01](01_local_simulation.md) | The 101: drive a small **local** simulation | 30–40 min | Lab 00 |
-| [02](03_local_training.md) | Drive a small **local** training run | 30–40 min | Lab 01 |
-| [03](04_local_inference.md) | Drive a small **local** inference run | 30–40 min | Lab 01 |
+| [02](02_local_training.md) | Drive a small **local** training run | 30–40 min | Lab 01 |
+| [03](03_local_inference.md) | Drive a small **local** inference run | 30–40 min | Lab 01 |
 
 **Suggested order:** 00 → 01 → 02 → 03. Labs 01, 02, and 03 are the
 **spine** — simulation, training, inference — the same three workloads you'll

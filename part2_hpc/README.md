@@ -64,7 +64,7 @@ spine from Part 1 — is a variation on it.
 - **The spine** — the simulation and training you ran on your laptop are the
   *same* workloads you scale here, now on real GPUs.
 - **Failure triage** — the GPU-vs-host-OOM and timeout signatures from
-  [Lab 02](../part1_fundamentals/03_local_training.md) are exactly what these native
+  [Lab 02](../part1_fundamentals/02_local_training.md) are exactly what these native
   jobs produce.
 
 ## A note on determinism

@@ -217,7 +217,7 @@ Reading a failed log is the same loop as Lab 03 — point the agent at the log:
 > Read `<the log path>` and tell me what failed, with quoted evidence and a fix.
 
 The GPU-vs-host-OOM and walltime-timeout signatures from
-[Lab 02](../part1_fundamentals/03_local_training.md) are exactly what these native jobs
+[Lab 02](../part1_fundamentals/02_local_training.md) are exactly what these native jobs
 produce.
 
 ---

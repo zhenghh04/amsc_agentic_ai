@@ -12,18 +12,15 @@ Personal Access Token.
 | Lab 00 | Setup + MAG (do this together; it's the biggest failure point). | 40 min |
 | Lab 01 | Drive a small simulation. | 40 min |
 | Break | | 10 min |
-| Lab 02 | MCP & tools. | 30 min |
-| Lab 03 | Drive a small training run. | 40 min |
-| Lab 04 | Drive an inference run. | 35 min |
+| Lab 02 | Drive a small training run. | 40 min |
+| Lab 03 | Drive an inference run. | 35 min |
 | Wrap | "Going further" to HPC; the spine scaled up in Parts 2/3; Q&A. | 25 min |
 
-The **spine** (Labs 01, 03, 04) is the heart of the workshop — the same three
-workloads participants will scale up in Parts 2 and 3. Lab 02 explains the tool
-machinery behind all of them and can run as a live demo if time is short.
+The **spine** (Labs 01, 02, 03) is the heart of the workshop — the same three
+workloads participants will scale up in Parts 2 and 3.
 
-- **Short (half-day):** Labs 00, 01 hands-on; Lab 02 live demo; Lab 03 hands-on;
-  Lab 04 as a demo.
-- **Full day:** all five, plus a look ahead at Part 2 or Part 3 on a real system.
+- **Short (half-day):** Labs 00, 01, 02 hands-on; Lab 03 as a demo.
+- **Full day:** all three labs hands-on, plus a look ahead at Part 2 or Part 3 on a real system.
 
 ## Pre-flight checklist (send to participants beforehand)
 
@@ -35,7 +32,7 @@ machinery behind all of them and can run as a live demo if time is short.
       <https://portal-lite.genesis.american-science-cloud.org/> *before* the
       session (the PAT is shown once — have them save it in a password manager).
 - [ ] Comfortable enough with a terminal to `cd`, edit a file, run a command.
-- [ ] Python 3 available (for Lab 01's simulation and Lab 03's training).
+- [ ] Python 3 available (for Lab 01's simulation and Lab 02's training).
 
 > **Biggest risk: MAG access.** Have participants verify Lab 00 Step 4 (a
 > round-trip reply) *before* the workshop, or arrive early. MAG is public-cloud,
@@ -63,14 +60,14 @@ prompt.
 `~/agent-labs`; the server refuses an out-of-scope path. Land the takeaway:
 **capability is added at the edge via MCP; the agent loop never changes.**
 
-**Lab 03 (training).** The agent writes a tiny training script (e.g. an MLP/CNN
+**Lab 02 (training).** The agent writes a tiny training script (e.g. an MLP/CNN
 on a small dataset), runs it, reads the loss/accuracy from the log, and iterates
 (learning rate, batch size). If it hits an OOM, it should distinguish GPU OOM
 (`torch.cuda.OutOfMemoryError`) from host OOM (`oom-kill`/137) — the sample logs
 in `samples/` give you a failure to triage even without a GPU. Takeaway: the
 **submit → read log → fix → resubmit** loop is the same one that drives real HPC.
 
-**Lab 04 (inference).** The agent runs inference two ways — a call to MAG, and
+**Lab 03 (inference).** The agent runs inference two ways — a call to MAG, and
 (optionally) a tiny local model — and reports the output plus a rough
 latency/throughput. Takeaway: serving is the same loop; on real systems it just
 gets a GPU and a bigger model (Part 2/3).

@@ -146,7 +146,7 @@ results back.
       conversation.
 - [ ] You have a `heat1d/` folder with code, figure, and `RUN_NOTES.md`.
 
-Then continue to [Lab 02 — training](03_local_training.md), the next spine workload.
+Then continue to [Lab 02 — training](02_local_training.md), the next spine workload.
 
 ---
 
@@ -173,7 +173,7 @@ against what you know, iterate.** Once you've felt how fast this is *and* where
 you still have to verify, you're ready to run the other two spine workloads
 (training, inference) and then scale all three onto real DOE systems.
 
-**Next:** [Lab 02 — drive a small local training run →](03_local_training.md)
+**Next:** [Lab 02 — drive a small local training run →](02_local_training.md)
 
 ---
 

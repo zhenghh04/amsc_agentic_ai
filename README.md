@@ -74,8 +74,8 @@ allocation, no HPC account.
 | --- | --- | --- | --- |
 | [00](part1_fundamentals/00_setup_claude_mag.md) | Set up Claude Code and MAG | 15–25 min | A laptop; a MAG Personal Access Token |
 | [01](part1_fundamentals/01_local_simulation.md) | The 101: drive a small **local** simulation | 30–40 min | Lab 00 |
-| [02](part1_fundamentals/03_local_training.md) | Drive a small **local** training run | 30–40 min | Lab 01 |
-| [03](part1_fundamentals/04_local_inference.md) | Drive a small **local** inference run | 30–40 min | Lab 01 |
+| [02](part1_fundamentals/02_local_training.md) | Drive a small **local** training run | 30–40 min | Lab 01 |
+| [03](part1_fundamentals/03_local_inference.md) | Drive a small **local** inference run | 30–40 min | Lab 01 |
 
 Labs 01 · 02 · 03 are the **spine** — simulation, training, inference — the same
 three workloads you'll scale up in Parts 2 and 3.

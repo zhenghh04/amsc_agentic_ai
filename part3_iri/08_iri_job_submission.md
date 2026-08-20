@@ -100,7 +100,7 @@ a path. Point the agent at the log:
 > ranked fix.
 
 It diagnoses the failure (the same triage from
-[Lab 02](../part1_fundamentals/03_local_training.md)) and proposes a fix; then ask it to
+[Lab 02](../part1_fundamentals/02_local_training.md)) and proposes a fix; then ask it to
 apply the fix and resubmit. **This is the loop becoming autonomous** — submit →
 read log → fix → resubmit — and it's the bridge to Part 4.
 
