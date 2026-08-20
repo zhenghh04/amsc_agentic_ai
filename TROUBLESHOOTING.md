@@ -4,7 +4,7 @@ Common snags, grouped by lab. Most issues are setup (Lab 00) or "the agent did
 something unexpected" (grounding). If you're stuck longer than a few minutes,
 skip ahead and come back — nothing here is a dead end.
 
-## Lab 00 — VS Code / Claude Code / MAG
+## Lab 00 — Claude Code / MAG
 
 **`claude: command not found`**
 : The CLI didn't install or isn't on your `PATH`. Re-run
@@ -16,10 +16,10 @@ skip ahead and come back — nothing here is a dead end.
   `irm https://claude.ai/install.ps1 | iex` on Windows) — it drops `claude` into
   your home directory, no admin needed.
 
-**The VS Code extension doesn't pair with the CLI**
+**The VS Code extension doesn't pair with the CLI** (optional — see Lab 00 Appendix A)
 : Open the integrated terminal and run `claude`, then `/ide` and select VS Code.
   Make sure the "Claude Code" extension (publisher Anthropic) is installed and
-  enabled.
+  enabled. VS Code is optional for this track — every lab works from the terminal.
 
 **401 / 403 / "invalid api key" from MAG**
 : Check `~/.claude/settings.json` (native Windows:
@@ -46,7 +46,7 @@ skip ahead and come back — nothing here is a dead end.
 : You must fully quit and relaunch the `claude` process. The base URL and model
   are read once at startup.
 
-## Lab 01 — HPC simulation
+## Lab 01 — Local simulation
 
 **The agent writes code that won't run (missing numpy/matplotlib)**
 : Ask it to use only the Python standard library, or to `pip install` what it

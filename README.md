@@ -8,10 +8,11 @@
 *August 2026*
 
 A hands-on tutorial for getting started with **agentic AI** as an AmSC
-(American Science Cloud) user. You'll set up an AI coding agent — **Claude Code**
-in **VS Code**, pointed at the **AmSC Model Access Gateway (MAG)** — and use it to
-do real scientific-computing work, first on your laptop and then on real DOE HPC
-systems: **Polaris** (ALCF), **Perlmutter** (NERSC), and **Frontier** (OLCF).
+(American Science Cloud) user. You'll set up an AI coding agent — **Claude Code**,
+pointed at the **AmSC Model Access Gateway (MAG)** (and optionally run inside
+**VS Code**) — and use it to do real scientific-computing work, first on your
+laptop and then on real DOE HPC systems: **Polaris** (ALCF), **Perlmutter**
+(NERSC), and **Frontier** (OLCF).
 
 You describe a task in plain English. The agent reasons about it, writes code,
 runs tools, submits jobs, reads the results, and iterates.
@@ -66,20 +67,18 @@ No prior AI/agent experience is assumed. Basic command-line comfort helps.
 
 ## Part 1 — Fundamentals (laptop only)
 
-Runs entirely on your laptop with VS Code + Claude Code + MAG — no allocation,
-no HPC account.
+Runs entirely on your laptop with Claude Code + MAG (VS Code optional) — no
+allocation, no HPC account.
 
 | Lab | Title | Time | Needs |
 | --- | --- | --- | --- |
-| [00](part1_fundamentals/00_setup_vscode_claude_mag.md) | Set up VS Code, Claude Code, and MAG | 20–30 min | A laptop; a MAG Personal Access Token |
-| [01](part1_fundamentals/01_hpc_simulation.md) | The 101: drive a small HPC **simulation** | 30–40 min | Lab 00 |
-| [02](part1_fundamentals/02_mcp_and_tools.md) | MCP & tools — how a prompt becomes a tool call | 20–30 min | Lab 00 |
-| [03](part1_fundamentals/03_training.md) | Drive a small **training** run | 30–40 min | Lab 01 |
-| [04](part1_fundamentals/04_inference.md) | Drive an **inference** run | 30–40 min | Lab 01 |
+| [00](part1_fundamentals/00_setup_claude_mag.md) | Set up Claude Code and MAG | 15–25 min | A laptop; a MAG Personal Access Token |
+| [01](part1_fundamentals/01_local_simulation.md) | The 101: drive a small **local** simulation | 30–40 min | Lab 00 |
+| [02](part1_fundamentals/03_local_training.md) | Drive a small **local** training run | 30–40 min | Lab 01 |
+| [03](part1_fundamentals/04_local_inference.md) | Drive a small **local** inference run | 30–40 min | Lab 01 |
 
-Labs 01 · 03 · 04 are the **spine** — simulation, training, inference — the same
-three workloads you'll scale up in Parts 2 and 3. Lab 02 explains the tool
-machinery underneath all of them.
+Labs 01 · 02 · 03 are the **spine** — simulation, training, inference — the same
+three workloads you'll scale up in Parts 2 and 3.
 
 ## Part 2 — Running Claude on HPC Systems
 
@@ -114,16 +113,15 @@ Every lab is self-contained with: **objectives · time · prerequisites · conce
 ```text
 Part 1 — laptop only                Part 2 — native, on your HPC system
 ────────────────────                ────────────────────────────────────
-00 set up VS Code + Claude + MAG     05 run Claude natively + a first job
+00 set up Claude Code + MAG          05 run Claude natively + a first job
 01 simulation ─┐                     06 scale the spine (training) natively
-03 training ───┤ the spine
-04 inference ──┘                     Part 3 — laptop + IRI/MCP (3 facilities)
-02 MCP & tools (how it works)        ─────────────────────────────────────
-                                     07 connect & explore (MCP setup)
-                    PREREQUISITES.md  08 IRI job submission + monitor
-                    (Part 3 only:     09 move data with Globus
-                     account,         10 spine end-to-end across facilities
-                     allocation,
+02 training ───┤ the spine
+03 inference ──┘                     Part 3 — laptop + IRI/MCP (3 facilities)
+                                     ─────────────────────────────────────
+                    PREREQUISITES.md  07 connect & explore (MCP setup)
+                    (Part 3 only:     08 IRI job submission + monitor
+                     account,         09 move data with Globus
+                     allocation,      10 spine end-to-end across facilities
                      IRI MCP servers)
 ```
 
@@ -151,7 +149,7 @@ Part 1 — laptop only                Part 2 — native, on your HPC system
 - An **agent** is an LLM in a loop that can *act*: read your request, call a
   tool, look at the result, decide the next step, repeat until done.
 - **MCP** (Model Context Protocol) is the open standard that lets an agent
-  discover and call external tools/services. (Lab 02.)
+  discover and call external tools/services.
 - The **spine** (simulation → training → inference) is the same three workloads
   scaled up from your laptop to real DOE systems, so nothing is a throwaway.
 

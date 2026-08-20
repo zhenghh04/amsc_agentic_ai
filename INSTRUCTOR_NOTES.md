@@ -28,7 +28,8 @@ machinery behind all of them and can run as a live demo if time is short.
 ## Pre-flight checklist (send to participants beforehand)
 
 - [ ] Laptop with rights to install software (or the no-admin path in Lab 00).
-- [ ] VS Code installed (<https://code.visualstudio.com/>).
+- [ ] (Optional) VS Code installed (<https://code.visualstudio.com/>) — only if
+      using the editor integration in Lab 00 Appendix A; the labs run from the terminal.
 - [ ] Node.js 18+ installed (`node --version`).
 - [ ] A **MAG account** and a **Personal Access Token** generated at
       <https://portal-lite.genesis.american-science-cloud.org/> *before* the
@@ -36,11 +37,11 @@ machinery behind all of them and can run as a live demo if time is short.
 - [ ] Comfortable enough with a terminal to `cd`, edit a file, run a command.
 - [ ] Python 3 available (for Lab 01's simulation and Lab 03's training).
 
-> **Biggest risk: MAG access.** Have participants verify Lab 00 Step 5 (a
+> **Biggest risk: MAG access.** Have participants verify Lab 00 Step 4 (a
 > round-trip reply) *before* the workshop, or arrive early. MAG is public-cloud,
 > so there's no VPN/proxy to fight — the usual failure is a mistyped base URL or a
 > PAT that was never copied. Backup: participants with a personal Anthropic key
-> can use [Lab 00 Appendix A](part1_fundamentals/00_setup_vscode_claude_mag.md#appendix-a--the-non-mag-path).
+> can use [Lab 00 Appendix B](part1_fundamentals/00_setup_claude_mag.md#appendix-b--the-non-mag-path).
 
 ## Answer key — what "success" looks like per lab
 

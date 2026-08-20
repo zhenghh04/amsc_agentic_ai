@@ -63,13 +63,12 @@ spine from Part 1 — is a variation on it.
 ## What carries over from Part 1
 
 - **Grounded prompts + verification** — even more important when jobs cost money.
-- **MCP mental model** ([Lab 02](../part1_fundamentals/02_mcp_and_tools.md)) —
-  this Part deliberately has *no* MCP tools; the agent gets a general-purpose
-  shell instead. Lab 05 names that trade-off explicitly.
+- **MCP mental model** — this Part deliberately has *no* MCP tools; the agent
+  gets a general-purpose shell instead. Lab 05 names that trade-off explicitly.
 - **The spine** — the simulation and training you ran on your laptop are the
   *same* workloads you scale here, now on real GPUs.
 - **Failure triage** — the GPU-vs-host-OOM and timeout signatures from
-  [Lab 03](../part1_fundamentals/03_training.md) are exactly what these native
+  [Lab 02](../part1_fundamentals/03_local_training.md) are exactly what these native
   jobs produce.
 
 ## A note on determinism
@@ -87,9 +86,8 @@ flexible, no facility-side setup, but no boundary on what it can touch.
 [Part 3 — Orchestrating Job Submission via IRI](../part3_iri/README.md) is the
 opposite trade: `claude` stays on your laptop, and the facility only ever sees a
 fixed, named, auditable set of tool calls — across all three systems.
-[Lab 02](../part1_fundamentals/02_mcp_and_tools.md) named this same trade-off for
-the `fs` server — neither is "more correct," and nothing stops you from doing
-both.
+The trade-off between shell-based and MCP-based access — neither is "more
+correct," and nothing stops you from doing both.
 
 Start with [Lab 05 — Run Claude natively on your system](05_native_on_your_system.md).
 

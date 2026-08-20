@@ -3,7 +3,7 @@
 > **Part 2 · Running Claude on HPC Systems · ~35–50 min · Cost: ~1 node-minute
 > (debug queue)**
 >
-> Prereq: [Lab 00](../part1_fundamentals/00_setup_vscode_claude_mag.md) (you know
+> Prereq: [Lab 00](../part1_fundamentals/00_setup_claude_mag.md) (you know
 > the MAG `settings.json` shape). Needs an **interactive account** on **one** of
 > Polaris, Perlmutter, or Frontier — no MCP server, no IRI, nothing from
 > [PREREQUISITES.md](../PREREQUISITES.md).
@@ -48,7 +48,7 @@ ssh <you>@frontier.olcf.ornl.gov    # Frontier (OLCF)
 ## Step 2 — Install Node.js + the Claude Code CLI (user-local)
 
 You don't have root on a shared login node, so install user-local — exactly as
-[Lab 00](../part1_fundamentals/00_setup_vscode_claude_mag.md) recommends for any
+[Lab 00](../part1_fundamentals/00_setup_claude_mag.md) recommends for any
 shared machine:
 
 ```bash
@@ -71,7 +71,7 @@ claude --version
 ## Step 3 — Point Claude Code at MAG (same as Lab 00 — no proxy)
 
 On the login node, `~/.claude/settings.json` — identical to
-[Lab 00 Step 5](../part1_fundamentals/00_setup_vscode_claude_mag.md#step-5--point-claude-code-at-mag):
+[Lab 00 Step 3](../part1_fundamentals/00_setup_claude_mag.md#step-3--point-claude-code-at-mag):
 
 ```json
 {
@@ -217,7 +217,7 @@ Reading a failed log is the same loop as Lab 03 — point the agent at the log:
 > Read `<the log path>` and tell me what failed, with quoted evidence and a fix.
 
 The GPU-vs-host-OOM and walltime-timeout signatures from
-[Lab 03](../part1_fundamentals/03_training.md) are exactly what these native jobs
+[Lab 02](../part1_fundamentals/03_local_training.md) are exactly what these native jobs
 produce.
 
 ---

@@ -5,7 +5,7 @@ Synthetic HPC job logs for the training lab. They're fabricated for teaching
 on DOE systems — one per facility. Use them if you don't have a failed log of
 your own handy.
 
-## Job failure logs — [Lab 03](../part1_fundamentals/03_training.md)
+## Job failure logs — [Lab 03](../part1_fundamentals/03_local_training.md)
 
 | File | System style | What fails | Root cause |
 | --- | --- | --- | --- |
@@ -17,7 +17,7 @@ Three distinct failure classes across the three facilities you'll use in Parts 2
 and 3:
 
 - **GPU OOM** vs **host OOM** look alike ("out of memory") but have different
-  causes and fixes — the core distinction Lab 03 Step 4 teaches.
+  causes and fixes — the core distinction Lab 02 Step 4 teaches.
 - The **Frontier timeout** is a *different category* entirely (the job never
   errored — it ran out of wall-clock before its first checkpoint), and it's on
   **AMD/ROCm** hardware (`rocm-smi`, not `nvidia-smi`) — good practice for the

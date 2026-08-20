@@ -1,17 +1,22 @@
-# Lab 00 — Set up VS Code, Claude Code, and MAG
+# Lab 00 — Set up Claude Code and MAG
 
-> **Part 1 · Fundamentals · ~20–30 min · No HPC allocation required**
+> **Part 1 · Fundamentals · ~15–25 min · No HPC allocation required**
 
 ## Objectives
 
 By the end you will have:
 
-1. VS Code installed with the **Claude Code** extension.
-2. The **Claude Code CLI** installed and paired with the editor.
-3. Claude Code pointed at the **AmSC Model Access Gateway (MAG)** — so your API
+1. The **Claude Code CLI** installed.
+2. Claude Code pointed at the **AmSC Model Access Gateway (MAG)** — so your API
    traffic goes through AmSC, billed to your AmSC project, with no personal
    Anthropic key.
-4. A verified round-trip: you type a message, the agent answers *via MAG*.
+3. A verified round-trip: you type a message, the agent answers *via MAG*.
+
+> **Prefer an editor?** Every lab in this track drives the agent from the
+> `claude` command in a terminal, so the CLI is all you need. If you'd rather run
+> Claude Code inside **VS Code**, set that up any time from
+> [Appendix A](#appendix-a--using-vs-code-optional) — it's entirely optional and
+> doesn't change any lab.
 
 ## Why MAG?
 
@@ -27,9 +32,9 @@ later in Part 2.
 
 > **⚠️ Prerequisite — get a MAG Personal Access Token first.** You need an AmSC
 > account with access to an approved **Genesis Mission RFA** project, then mint a
-> PAT (Step 4 below). Do this **before** the verification step. Not an AmSC user,
+> PAT (Step 2 below). Do this **before** the verification step. Not an AmSC user,
 > or you already have a Claude subscription / Anthropic API key? Use the non-MAG
-> path in [Appendix A](#appendix-a--the-non-mag-path) instead — the rest of the
+> path in [Appendix B](#appendix-b--the-non-mag-path) instead — the rest of the
 > track works either way.
 
 ---
@@ -59,33 +64,12 @@ Pick one and stay with it.
 
 ---
 
-## Step 1 — Install VS Code
+## Step 1 — Install Node.js and the Claude Code CLI
 
-Download and install from <https://code.visualstudio.com/> — installers exist for
-macOS, Linux (`.deb` / `.rpm` / Snap / tarball), and Windows. You'll use the
-`code` command to open a folder from the terminal, so make sure it's on your
-`PATH`:
-
-- **macOS:** launch VS Code once, then Command Palette (⇧⌘P) → *Shell Command:
-  Install 'code' command in PATH*.
-- **Linux:** the `.deb`/`.rpm` packages and the Snap add `code` to `PATH`
-  automatically. (Tarball? Add its `bin/` directory to `PATH`.)
-- **Windows:** the installer's *"Add to PATH"* option is on by default, so `code`
-  works in a **new** PowerShell/CMD window after install. Using WSL? Install the
-  [WSL extension](https://code.visualstudio.com/docs/remote/wsl) and run `code`
-  from inside your Linux distro.
-
-## Step 2 — Install Node.js and the Claude Code CLI (recommended)
-
-> **Optional?** The VS Code extension bundles its own copy of the CLI for its
-> graphical **chat panel**, so if you'll work *only* in that panel you can skip
-> installing the standalone CLI. But every lab drives the agent from the `claude`
-> **command in the terminal** — slash commands, `/mcp`, and `claude mcp add` in
-> [Lab 02](02_mcp_and_tools.md) — which needs the standalone install below, and
-> **Node.js is required either way** for Lab 02's `npx` MCP server. **Recommended:
-> do this step.**
-
-Install **Node.js 18+** (20 LTS or newer recommended), then the Claude Code CLI.
+Every lab drives the agent from the `claude` **command in the terminal** — slash
+commands, `/mcp`, and `claude mcp add` — and **Node.js is required** for `npx`
+MCP servers. Install **Node.js 18+** (20 LTS or newer recommended), then the
+Claude Code CLI.
 
 ```bash
 # macOS (Homebrew)
@@ -125,57 +109,33 @@ claude --version
 > `irm https://claude.ai/install.ps1 | iex` (Windows PowerShell). You still need
 > Node.js for the `npx` MCP server in Lab 02, so this track installs it anyway.
 
-## Step 3 — Install the Claude Code VS Code extension
-
-In VS Code, open the **Extensions** panel — **⇧⌘X** on macOS, **Ctrl+Shift+X**
-on Linux/Windows — search **"Claude Code"** (publisher *Anthropic*) →
-**Install**. Then open a fresh folder to work in:
-
-```bash
-# macOS / Linux / WSL
-mkdir -p ~/agent-labs
-code ~/agent-labs
-```
-
-```powershell
-# Windows (PowerShell)
-mkdir $HOME\agent-labs
-code $HOME\agent-labs
-```
-
-Open the integrated terminal — **⌃`** on macOS, **Ctrl+`** on Linux/Windows —
-and run `claude`. The extension detects the running CLI and connects. (If they
-don't auto-pair, run `/ide` inside `claude` and pick VS Code.)
-
 ## No admin rights? (managed or locked-down machines)
 
-Every step above can be done **without administrator / root access** — nothing in
+Every step here can be done **without administrator / root access** — nothing in
 this track needs to write to a system directory:
 
-- **VS Code** — Windows *User Installer* (installs under `%LOCALAPPDATA%`) or the
-  portable ZIP; macOS drag to `~/Applications`; Linux `.tar.gz` under your home
-  with its `bin/` on `PATH`.
 - **Node.js** — a per-user version manager (nvm on macOS/Linux/WSL; nvm-windows
   or fnm on Windows) lives entirely in your home directory.
-- **Claude Code + the VS Code extension** — with Node under nvm, `npm install -g`
-  needs no admin; VS Code extensions always install per-user.
+- **Claude Code** — with Node under nvm, `npm install -g` needs no admin (or use
+  the `--prefix ~/.npm-global` form above).
 
-Steps 4+ only write config under your home directory
-(`~/.claude/settings.json`), so they never need elevated access.
+Steps 2+ only write config under your home directory
+(`~/.claude/settings.json`), so they never need elevated access. (Installing
+VS Code without admin is covered in [Appendix A](#appendix-a--using-vs-code-optional).)
 
-## Step 4 — Get a MAG Personal Access Token
+## Step 2 — Get a MAG Personal Access Token
 
 1. Open the MAG portal: <https://portal-lite.genesis.american-science-cloud.org/>
 2. Log in and **select an approved AmSC Genesis Mission RFA project** (your usage
    is billed to it).
 3. Go to **Personal Access Tokens** → **Generate PAT**.
 4. **Copy the key immediately** — MAG displays the complete key **only once**.
-   Store it in a password manager; you'll paste it into settings in Step 5.
+   Store it in a password manager; you'll paste it into settings in Step 3.
 
 > Treat the PAT like a password. Don't commit it to git, don't paste it into
 > shared files, and don't put it in a repo's `.env` that others can read.
 
-## Step 5 — Point Claude Code at MAG
+## Step 3 — Point Claude Code at MAG
 
 Claude Code reads global settings from `~/.claude/settings.json` — on native
 Windows that's `%USERPROFILE%\.claude\settings.json`; in WSL it's
@@ -220,9 +180,25 @@ supplies your PAT:
 Save the file and **fully restart Claude Code** (quit the `claude` process and
 relaunch) — the base URL and token are read at startup.
 
-## Step 6 — Verify the round-trip
+## Step 4 — Verify the round-trip
 
-In the Claude Code terminal, type:
+Create a working folder and launch Claude Code in it:
+
+```bash
+# macOS / Linux / WSL
+mkdir -p ~/agent-labs
+cd ~/agent-labs
+claude
+```
+
+```powershell
+# Windows (PowerShell)
+mkdir $HOME\agent-labs
+cd $HOME\agent-labs
+claude
+```
+
+In the Claude Code prompt, type:
 
 > Say hello in one sentence, and tell me roughly how many tokens of context you
 > can hold.
@@ -231,24 +207,24 @@ You should get a normal reply within a second or two.
 
 **What just happened:** that reply came back through
 `i2-api.genesis.american-science-cloud.org`, not `api.anthropic.com`. You're now
-driving a frontier model billed to your AmSC project, from your editor.
-Everything in Part 1 runs on exactly this setup — no HPC access needed yet.
+driving a frontier model billed to your AmSC project. Everything in Part 1 runs
+on exactly this setup — no HPC access needed yet.
 
 ---
 
 ## ✅ Checkpoint
 
 - [ ] `claude --version` prints a version.
-- [ ] The Claude Code panel is visible in VS Code and paired.
 - [ ] `~/.claude/settings.json` (native Windows:
       `%USERPROFILE%\.claude\settings.json`) has the MAG `env` block with your
       PAT.
-- [ ] You got a reply to the Step 6 prompt. If instead you saw a **401/403** or
+- [ ] You got a reply to the Step 4 prompt. If instead you saw a **401/403** or
       "invalid api key", re-check the base URL and PAT (and that the PAT hasn't
       expired). A **"model not found"** means the `ANTHROPIC_MODEL` string isn't
       served — use an alias.
 
-If all four are checked, go to [Lab 01 — drive a small simulation](01_hpc_simulation.md).
+If both config items are set and you got a reply, go to
+[Lab 01 — drive a small simulation](01_local_simulation.md).
 
 ---
 
@@ -259,22 +235,79 @@ If all four are checked, go to [Lab 01 — drive a small simulation](01_hpc_simu
    model.
 2. Drop any text file into `~/agent-labs`, then ask *"what files are in this
    folder, and what's in that one?"* Watch it read the file. This is your first
-   tool call (a file read) — the subject of [Lab 02](02_mcp_and_tools.md).
-3. Open a file in VS Code, select a few lines, and ask the agent *"what does this
-   selection do?"* — confirm the editor selection reached the agent.
+   tool call (a file read).
 
 ---
 
-## Appendix A — the non-MAG path
+## Appendix A — Using VS Code (optional)
 
-If you have a Claude Pro/Max subscription or an Anthropic API key, skip Steps 4–5
+You never need VS Code for this track — every lab drives the agent from the
+`claude` command in a terminal. But if you'd like the agent inside your editor
+(a graphical chat panel, editor selections sent to the agent), here's the setup.
+It works on macOS, Linux, and Windows, and needs no admin rights.
+
+### Install VS Code
+
+Download and install from <https://code.visualstudio.com/> — installers exist for
+macOS, Linux (`.deb` / `.rpm` / Snap / tarball), and Windows. You'll use the
+`code` command to open a folder from the terminal, so make sure it's on your
+`PATH`:
+
+- **macOS:** launch VS Code once, then Command Palette (⇧⌘P) → *Shell Command:
+  Install 'code' command in PATH*.
+- **Linux:** the `.deb`/`.rpm` packages and the Snap add `code` to `PATH`
+  automatically. (Tarball? Add its `bin/` directory to `PATH`.)
+- **Windows:** the installer's *"Add to PATH"* option is on by default, so `code`
+  works in a **new** PowerShell/CMD window after install. Using WSL? Install the
+  [WSL extension](https://code.visualstudio.com/docs/remote/wsl) and run `code`
+  from inside your Linux distro.
+
+**No admin rights?** VS Code installs per-user — Windows *User Installer*
+(installs under `%LOCALAPPDATA%`) or the portable ZIP; macOS drag to
+`~/Applications`; Linux `.tar.gz` under your home with its `bin/` on `PATH`. VS
+Code extensions always install per-user.
+
+### Install the Claude Code extension and pair
+
+In VS Code, open the **Extensions** panel — **⇧⌘X** on macOS, **Ctrl+Shift+X**
+on Linux/Windows — search **"Claude Code"** (publisher *Anthropic*) →
+**Install**. Then open your working folder:
+
+```bash
+# macOS / Linux / WSL
+code ~/agent-labs
+```
+
+```powershell
+# Windows (PowerShell)
+code $HOME\agent-labs
+```
+
+Open the integrated terminal — **⌃`** on macOS, **Ctrl+`** on Linux/Windows —
+and run `claude`. The extension detects the running CLI and connects. (If they
+don't auto-pair, run `/ide` inside `claude` and pick VS Code.)
+
+> The VS Code extension bundles its own copy of the CLI for its graphical **chat
+> panel**, but the labs use the `claude` command in the terminal — so keep the
+> standalone CLI from [Step 1](#step-1--install-nodejs-and-the-claude-code-cli).
+
+### Try it
+
+Open a file in VS Code, select a few lines, and ask the agent *"what does this
+selection do?"* — confirm the editor selection reached the agent.
+
+---
+
+## Appendix B — the non-MAG path
+
+If you have a Claude Pro/Max subscription or an Anthropic API key, skip Steps 2–3
 entirely. Just run `claude`, then `/login`, and follow the browser flow (or set
 `ANTHROPIC_API_KEY` in your environment). Leave `ANTHROPIC_BASE_URL` unset. Every
 other lab is identical.
 
 ---
 
-**Next:** [Lab 01 — The 101: drive a small HPC simulation →](01_hpc_simulation.md)
+**Next:** [Lab 01 — The 101: drive a small local simulation →](01_local_simulation.md)
 
 ---
 

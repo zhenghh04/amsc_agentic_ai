@@ -57,9 +57,8 @@ Frontier.
 ## What carries over from Part 1 and 2
 
 - **Grounded prompts + verification** — even more important when jobs cost money.
-- **MCP mental model** ([Lab 02](../part1_fundamentals/02_mcp_and_tools.md)) —
-  these facility tools are just more MCP tools; the agent loop doesn't change,
-  only what's at the edge.
+- **MCP mental model** — the facility tools are just MCP tools; the agent loop
+  doesn't change, only what's at the edge.
 - **The spine** — the simulation/training/inference you built in Part 1 is what
   you now orchestrate on real systems, and (Lab 10) the *same* workload across
   three of them.
@@ -83,9 +82,8 @@ Part 3 keeps the agent on your laptop with a fixed, auditable tool set across
 three facilities — governed, but narrower than a real shell.
 [Part 2 — Running Claude on HPC Systems](../part2_hpc/README.md) is the opposite
 trade: `claude` runs directly on a login node with full shell access, no
-facility-side setup. [Lab 02](../part1_fundamentals/02_mcp_and_tools.md) named
-this same trade-off for the `fs` server — neither is "more correct," and nothing
-stops you from doing both.
+facility-side setup. Neither is "more correct," and nothing stops you from doing
+both.
 
 Start with [Lab 07 — Connect to ALCF/NERSC/OLCF & explore](07_mcp_setup_and_explore.md).
 

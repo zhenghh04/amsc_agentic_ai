@@ -1,8 +1,8 @@
-# Lab 01 — The 101: Drive a Small HPC Simulation with the Agent
+# Lab 01 — The 101: Drive a Small Local Simulation with the Agent
 
 > **Part 1 · Fundamentals · ~30–40 min · No HPC allocation required**
 >
-> Prereq: [Lab 00](00_setup_vscode_claude_mag.md) (VS Code + Claude Code + MAG).
+> Prereq: [Lab 00](00_setup_claude_mag.md) (Claude Code + MAG).
 
 This is the "hello world" of agentic AI for computational scientists: take a task
 you already do — **running a small simulation** — and do it *with* an agent. You'll
@@ -82,8 +82,7 @@ Steps 1–4 are the thorough, repeatable version of the quick "Start here" ask.
 **What just happened:** the agent called its **file-writing tool** to create
 `heat1d.py` and its **shell tool** to run it. Writing code and running it are
 tool calls, not something the model "just does" — these are your first concrete
-tool calls (the subject of [Lab 02](02_mcp_and_tools.md)). The "show me the
-actual run output" instruction keeps it honest.
+tool calls. The "show me the actual run output" instruction keeps it honest.
 
 ## Step 2 — Get the artifacts
 
@@ -147,8 +146,7 @@ results back.
       conversation.
 - [ ] You have a `heat1d/` folder with code, figure, and `RUN_NOTES.md`.
 
-Then continue to [Lab 02 — MCP & tools](02_mcp_and_tools.md), or jump to the next
-spine workload, [Lab 03 — training](03_training.md).
+Then continue to [Lab 02 — training](03_local_training.md), the next spine workload.
 
 ---
 
@@ -175,7 +173,7 @@ against what you know, iterate.** Once you've felt how fast this is *and* where
 you still have to verify, you're ready to run the other two spine workloads
 (training, inference) and then scale all three onto real DOE systems.
 
-**Next:** [Lab 02 — MCP & tools: how a prompt becomes a tool call →](02_mcp_and_tools.md)
+**Next:** [Lab 02 — drive a small local training run →](03_local_training.md)
 
 ---
 

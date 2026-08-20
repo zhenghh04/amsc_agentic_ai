@@ -1,0 +1,25 @@
+\frametitle{A plain-language request becomes a monitored PBS job}
+\begin{chatbubble}{accentgold}{\faUser\ Scientist}
+    \scriptsize ``Submit a 4-node LAMMPS run on Polaris under my allocation, then let me know when it's done.''
+  \end{chatbubble}
+  \vspace{1pt}
+  \begin{chatbubble}{accentteal}{\faRobot\ Trinity}
+    \scriptsize Resolved account \& run directory via \texttt{run\_dir.py}, generated the job script below,
+    and submitted it through the \texttt{submit-job} skill.
+  \end{chatbubble}
+  \vspace{1pt}
+  \noindent\tikz[baseline]{\node[fill=labink, text=white, rounded corners=2pt,
+    inner sep=2pt, font=\bfseries\tiny\ttfamily] {\faTerminal\ run.sh (bash)};}\par\vspace{0pt}
+  \begin{lstlisting}[style=shell]
+#!/bin/bash -l
+#PBS -A <allocation> -q prod -l select=4:system=polaris -l walltime=01:00:00
+WORKDIR="$(cd "$(dirname "$0")/.." && pwd)"; cd "$WORKDIR"
+mpiexec -n 16 --ppn 4 lmp -in in.lammps   # -> outputs/, logs/
+  \end{lstlisting}
+  \vspace{1pt}
+  \begin{tcolorbox}[enhanced, colback=accentteal!10, colframe=accentteal!60!black, boxrule=0.5pt,
+    arc=4pt, left=6pt, right=6pt, top=2pt, bottom=2pt, width=\linewidth,
+    drop fuzzy shadow]
+    \scriptsize\faCheckCircle\ \textbf{Trinity:} Job \texttt{1234567} completed in 42 min on 4 Polaris nodes ---
+    results saved under \texttt{jobs/polaris/lammps\_run/outputs/}.
+  \end{tcolorbox}

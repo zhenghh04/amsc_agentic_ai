@@ -1,9 +1,9 @@
-# Lab 04 — Drive an Inference Run
+# Lab 03 — Drive a Small Local Inference Run
 
 > **Part 1 · Fundamentals · ~30–40 min · No HPC allocation required**
 >
-> Prereq: [Lab 01](01_hpc_simulation.md). Helpful:
-> [Lab 03](03_training.md) (the training half of the ML story).
+> Prereq: [Lab 01](01_local_simulation.md). Helpful:
+> [Lab 02](03_local_training.md) (the training half of the ML story).
 
 The last workload of the spine is **inference** — using a trained model to make
 predictions, and measuring how fast. You'll run inference two ways: as a **call to

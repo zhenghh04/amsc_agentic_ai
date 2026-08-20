@@ -5,10 +5,10 @@
 >
 > Prereq: [Lab 05](05_native_on_your_system.md) — `claude` replies on your login
 > node and you've run one native job. Helpful:
-> [Lab 03](../part1_fundamentals/03_training.md) (the laptop training run).
+> [Lab 03](../part1_fundamentals/03_local_training.md) (the laptop training run).
 
 Lab 05 ran the *simulation* spine workload on a real node. This lab scales the
-*training* workload — the CNN from [Lab 03](../part1_fundamentals/03_training.md) —
+*training* workload — the CNN from [Lab 03](../part1_fundamentals/03_local_training.md) —
 onto real GPUs, then to **data-parallel across all GPUs on a node**. Same loop,
 same skills; the only new things are the GPU and the launcher.
 
@@ -80,7 +80,7 @@ the agent at the log:
 > Read `<the job log>` and tell me what failed, with quoted evidence and a ranked
 > fix. Distinguish a GPU OOM from a host OOM from a timeout.
 
-This is the same triage from [Lab 03](../part1_fundamentals/03_training.md) —
+This is the same triage from [Lab 03](../part1_fundamentals/03_local_training.md) —
 the `samples/` logs (`polaris_train_ddp` GPU OOM, `perlmutter_preprocess` host OOM,
 `frontier_train_timeout` walltime) are the exact shapes you'll now hit for real.
 Fix and resubmit; loop until it succeeds.

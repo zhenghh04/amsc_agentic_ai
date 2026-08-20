@@ -17,11 +17,10 @@ where the same loop goes next — **autonomous campaigns**.
 
 ## The idea doesn't change — only the tools do
 
-From [Lab 02](part1_fundamentals/02_mcp_and_tools.md): the agent loop is always
-*read → reason → call a tool → observe → repeat*. Running an HPC job just means
-the tools it calls reach a facility instead of your local disk. You connect an
-**MCP server that wraps the facility's APIs**, and then ask in plain English — the
-same way you used the `fs` server.
+The agent loop is always *read → reason → call a tool → observe → repeat*.
+Running an HPC job just means the tools it calls reach a facility instead of your
+local disk. You connect an **MCP server that wraps the facility's APIs**, and then
+ask in plain English — the same way you used the `fs` server.
 
 ```text
 you: "train the CNN on Perlmutter and tell me the accuracy"

@@ -66,7 +66,7 @@ GPU. When it happens:
 > Read the job's stderr/stdout and tell me what failed, with quoted evidence and a
 > ranked fix.
 
-The triage from [Lab 03](../part1_fundamentals/03_training.md) diagnoses it (GPU
+The triage from [Lab 02](../part1_fundamentals/03_local_training.md) diagnoses it (GPU
 OOM → smaller batch; host OOM → stream the data; timeout → checkpoint sooner or ask
 for more walltime; wrong GPU stack → install the ROCm wheel). Then:
 

@@ -144,8 +144,7 @@ raises a clear error if neither is present.
 
 ## 3. The IRI MCP servers, configured in Claude Code
 
-This is the new piece. In [Lab 02](part1_fundamentals/02_mcp_and_tools.md) you
-added a filesystem MCP server; here you add the ones that expose each facility's
+This is the new piece. You'll add the MCP servers that expose each facility's
 **IRI + Globus** capabilities as tools — submit a job, check status, list/read
 files, transfer data.
 

@@ -1,9 +1,9 @@
-# Lab 03 — Drive a Small Training Run
+# Lab 02 — Drive a Small Local Training Run
 
 > **Part 1 · Fundamentals · ~30–40 min · No HPC allocation required**
 >
-> Prereq: [Lab 01](01_hpc_simulation.md) (you've seen the write → run → read
-> loop). Helpful: [Lab 02](02_mcp_and_tools.md).
+> Prereq: [Lab 01](01_local_simulation.md) (you've seen the write → run → read
+> loop).
 
 Lab 01 drove a simulation; this lab drives the **second workload of the spine**:
 a small **machine-learning training run**. You'll have the agent write a training
@@ -121,7 +121,7 @@ of triage you'll do constantly once the agent runs real jobs in Parts 2 and 3.
 - [ ] You triaged both sample logs and the agent distinguished **GPU** OOM from
       **host** OOM with quoted evidence and different fixes.
 
-Then continue to [Lab 04 — inference](04_inference.md), the last spine workload.
+Then continue to [Lab 03 — inference](04_local_inference.md), the last spine workload.
 
 ---
 
@@ -146,7 +146,7 @@ produces. In Part 2 the *same* training runs on a compute node; in Part 3 the
 agent submits it as a job, monitors it, and triages failures with this very loop —
 now spending real node-hours. You've built the muscle locally, for free.
 
-**Next:** [Lab 04 — drive an inference run →](04_inference.md)
+**Next:** [Lab 03 — drive a small local inference run →](04_local_inference.md)
 
 ---
 
