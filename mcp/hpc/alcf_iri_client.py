@@ -353,11 +353,25 @@ class ALCFIRIClient:
         return resp.json()
 
     def _local_endpoint(self) -> str:
-        """Return the local Globus Connect Personal endpoint UUID."""
-        ep = os.environ.get("LOCAL_GLOBUS_ENDPOINT", "3ebfde51-41f4-11f1-9105-02535127e3d7")
+        """Return the local Globus Connect Personal endpoint UUID.
+
+        Discovery order:
+          1. LOCAL_GLOBUS_ENDPOINT env var (explicit override)
+          2. globus_sdk.LocalGlobusConnectPersonal — reads ~/.globusonline/lta/client-id.txt
+          3. RuntimeError with a clear message
+        """
+        ep = os.environ.get("LOCAL_GLOBUS_ENDPOINT", "")
+        if ep:
+            return ep
+        try:
+            from globus_sdk import LocalGlobusConnectPersonal
+            ep = LocalGlobusConnectPersonal().endpoint_id
+        except Exception:
+            ep = None
         if not ep:
             raise RuntimeError(
-                "No local Globus endpoint. Set LOCAL_GLOBUS_ENDPOINT env var."
+                "No local Globus Connect Personal endpoint found. "
+                "Install Globus Connect Personal or set LOCAL_GLOBUS_ENDPOINT in .env."
             )
         return ep
 
