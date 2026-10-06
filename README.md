@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="assets/trinity-logo.svg" alt="Trinity Science" width="72" height="72">
-</p>
-
 # Minimal Examples: Using MAG and IRI for Agentic Workflows
 
 *Author: Huihuo Zheng, huihuo.zheng@anl.gov*<br>
