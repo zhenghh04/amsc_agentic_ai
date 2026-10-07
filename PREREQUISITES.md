@@ -70,7 +70,9 @@ python scripts/auth/alcf_iri_token.py authenticate
 # --- NERSC / Perlmutter — browser Globus login (must log in via nersc.gov)
 python scripts/auth/nersc_iri_token.py authenticate
 
-# --- Globus Transfer token — move data to/from any facility's filesystems
+# --- Globus Transfer + Compute token — move data to/from any facility's
+#     filesystems, and (Lab 09) run functions on a facility MEP. One login
+#     mints both GLOBUS_TRANSFER_TOKEN and GLOBUS_COMPUTE_TOKEN into .env.
 python scripts/auth/globus_auth.py authenticate
 ```
 
@@ -102,7 +104,7 @@ moves on Frontier go through **Globus** (the shared token from Step 2 above).
 
 To transfer files **to or from your own laptop or workstation** you need a
 **Globus Connect Personal (GCP)** endpoint running on that machine. Skip this
-sub-step if you only need facility-to-facility transfers (Step 4 of Lab 09
+sub-step if you only need facility-to-facility transfers (Lab 08's staging step
 covers that alternative).
 
 ### Install Globus Connect Personal
@@ -156,14 +158,23 @@ files, transfer data.
 | [`mcp/hpc/nersc_server.py`](mcp/hpc/nersc_server.py) | `api.iri.nersc.gov` | **Perlmutter** | `NERSC_IRI_TOKEN` |
 | [`mcp/hpc/olcf_iri_server.py`](mcp/hpc/olcf_iri_server.py) | `amsc-moderate.s3m.olcf.ornl.gov` | **Frontier** | `OLCF_IRI_TOKEN` |
 
-All three are wired up in [`.mcp.json`](.mcp.json) in this folder:
+Lab 09 (remote functions) adds two more, both optional:
+
+| Server | Talks to | Serves | Token env var |
+| --- | --- | --- | --- |
+| [`mcp/compute/globus_compute_server.py`](mcp/compute/globus_compute_server.py) | `compute.api.globus.org` | Functions on a facility MEP (Polaris, Crux) | `GLOBUS_COMPUTE_TOKEN` |
+| [`mcp/knowledge/docs_server.py`](mcp/knowledge/docs_server.py) | `ask.alcf.anl.gov/mcp` | `retrieve_alcf_docs` over public DOE docs | **none** |
+
+All five are wired up in [`.mcp.json`](.mcp.json) in this folder:
 
 ```json
 {
   "mcpServers": {
     "alcf-iri": { "command": "python", "args": ["mcp/hpc/alcf_server.py"] },
     "nersc-iri": { "command": "python", "args": ["mcp/hpc/nersc_server.py"] },
-    "olcf-iri": { "command": "python", "args": ["mcp/hpc/olcf_iri_server.py"] }
+    "olcf-iri": { "command": "python", "args": ["mcp/hpc/olcf_iri_server.py"] },
+    "globus-compute": { "command": "python", "args": ["mcp/compute/globus_compute_server.py"] },
+    "knowledge": { "command": "python", "args": ["mcp/knowledge/docs_server.py"] }
   }
 }
 ```
@@ -193,7 +204,8 @@ Inside `claude`, from `amsc_agentic_ai/`:
 
 You should see **alcf-iri**, **nersc-iri**, and **olcf-iri**, each with tools
 including `list_resources`, `get_system_status`, `list_projects`, `submit_job`,
-`get_job_status`. Then:
+`get_job_status` (plus **globus-compute** and **knowledge** if you set up Lab 09).
+Then:
 
 > What compute resources are up right now at ALCF, NERSC, and OLCF, and what
 > allocations do I have on each?

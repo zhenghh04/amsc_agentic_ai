@@ -144,7 +144,7 @@ account name — have the agent read it.
 > fails, ask the agent to try the other path form — a common first-time snag.
 
 **What just happened:** you can now inspect DOE storage conversationally across
-facilities. In Lab 09 you'll *move* data; today you're just reading.
+facilities. In Lab 08 you'll *move* data and run a job; today you're just reading.
 
 ---
 

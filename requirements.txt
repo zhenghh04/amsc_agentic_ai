@@ -4,6 +4,9 @@
 #
 # Part 1 (laptop) labs install their own extras on demand (numpy, matplotlib,
 # torch, anthropic) — see each lab; they are not required here.
-mcp>=1.0            # FastMCP server framework (mcp.server.fastmcp)
+mcp>=1.9,<2         # FastMCP server + streamable-http client (mcp.server.fastmcp,
+                    #   mcp.client) — the knowledge server is a client of ask.alcf.anl.gov/mcp
 httpx>=0.27         # async HTTP client used by the IRI clients
-globus-sdk>=3.30    # Globus OAuth login flows in scripts/auth/
+globus-sdk>=3.30    # Globus OAuth login flows in scripts/auth/ (compute auth too)
+globus-compute-sdk>=4.6  # run functions on facility MEPs (mcp/compute/*); needs a
+                    #   release supporting globus-sdk 4.x (installed on demand for Part 3)

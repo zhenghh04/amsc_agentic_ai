@@ -23,6 +23,17 @@ is installed on the shared login nodes.
 You don't need all three. Set up the one(s) you have; the servers you didn't
 authenticate simply report "not authenticated" and are harmless.
 
+### Two more servers for Lab 09
+
+Lab 09 (remote functions) adds two servers on top of the IRI three:
+
+| Server | Serves | Auth (see PREREQUISITES) |
+| --- | --- | --- |
+| `globus-compute` | Runs a Python function / shell command on a facility MEP (Polaris, Crux) | Globus browser login (`globus_auth.py` — same one as Transfer) |
+| `knowledge` | `retrieve_alcf_docs` — searches the public ALCF/NERSC/OLCF docs | **none** (public endpoint, token-free) |
+
+Both are optional and only used in Lab 09; skip them if you're stopping at Lab 08.
+
 ---
 
 ## The labs
@@ -31,6 +42,7 @@ authenticate simply report "not authenticated" and are harmless.
 | --- | --- | --- | --- |
 | [07](07_mcp_setup_and_explore.md) | Connect to ALCF/NERSC/OLCF & explore (read-only) | 20–30 min | free (no jobs) |
 | [08](08_iri_job_submission.md) | IRI job submission and monitoring | 30–45 min | ~1 node-minute |
+| [09](09_remote_functions.md) | Remote functions with Globus Compute | 30–45 min | ~1 node-minute |
 
 ## The one loop to learn
 
