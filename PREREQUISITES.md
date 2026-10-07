@@ -24,8 +24,8 @@ Work through this once before starting [Lab 07](part3_iri/07_mcp_setup_and_explo
 ## 0. Python and the server dependencies (do this first)
 
 The three IRI servers and the `scripts/auth/` helpers are small Python programs.
-They need **Python 3.10+** and three packages. Install them once — ideally into a
-virtual environment so `python` resolves to the right interpreter:
+They need **Python 3.10+** and a handful of packages. Install them once — ideally
+into a virtual environment so `python` resolves to the right interpreter:
 
 ```bash
 cd amsc_agentic_ai
@@ -33,10 +33,12 @@ python3 -m venv .venv && source .venv/bin/activate   # recommended
 pip install -r requirements.txt
 ```
 
-`requirements.txt` pulls in `mcp` (the MCP server framework), `httpx` (the async
-HTTP client the servers use), and `globus-sdk` (the browser login flow in the auth
-scripts). Skip this and the auth scripts fail with `ModuleNotFoundError: No module
-named 'globus_sdk'`, and the servers never appear in `/mcp`.
+`requirements.txt` pulls in three for the IRI spine — `mcp` (the MCP server
+framework), `httpx` (the async HTTP client the servers use), and `globus-sdk` (the
+browser login flow in the auth scripts) — plus `globus-compute-sdk`, which only the
+optional Lab 09 compute server needs. Skip this and the auth scripts fail with
+`ModuleNotFoundError: No module named 'globus_sdk'`, and the servers never appear
+in `/mcp`.
 
 > **`python` vs `python3`.** `.mcp.json` launches each server with `python`. Inside
 > an activated venv (above) that's correct. If you don't use a venv and your system

@@ -79,6 +79,27 @@ def _load_env() -> None:
             os.environ[key] = value
 
 
+def _update_env(key: str, value: str) -> None:
+    """Update or add a key=value pair in the .env file (as the IRI servers do).
+
+    Needed because credential reads go through ``trinity_env.read_value``, which
+    reads the file and bypasses ``os.environ`` on purpose: a token handed to
+    ``authenticate()`` has to land on disk or no later call would ever see it.
+    """
+    lines: list[str] = []
+    found = False
+    if _ENV_FILE.exists():
+        for line in _ENV_FILE.read_text().splitlines():
+            if line.lstrip().startswith(f"export {key}=") or line.startswith(f"{key}="):
+                lines.append(f"{key}={value}")
+                found = True
+            else:
+                lines.append(line)
+    if not found:
+        lines.append(f"{key}={value}")
+    _ENV_FILE.write_text("\n".join(lines) + "\n")
+
+
 _load_env()
 
 mcp = FastMCP("globus-compute")
@@ -141,8 +162,17 @@ def _get_client():
             f"No {_TOKEN_VAR} in {_ENV_FILE}. Mint one with: "
             "python scripts/auth/globus_auth.py ensure_valid"
         )
-    global _client, _client_token
+    global _client, _client_token, _shell_func_id
     if _client is None or token != _client_token:
+        # A token change can also be an *identity* change, and function UUIDs are
+        # owned by the principal that registered them. Drop the name->UUID caches
+        # with the client, or a later run_function would hand this identity a
+        # registration it may not be allowed to invoke. Done here rather than in
+        # authenticate() because the token is re-read every call, so this also
+        # catches a rotation performed outside this process.
+        if _client_token is not None and token != _client_token:
+            _registered.clear()
+            _shell_func_id = None
         Client, AccessTokenAuthorizer = _globus_compute_deps()
         _client = Client(authorizer=AccessTokenAuthorizer(token))
         _client_token = token
@@ -226,25 +256,29 @@ async def authenticate(token: str = "") -> str:
                back to GLOBUS_COMPUTE_TOKEN in .env (re-read at call time), so a
                bare authenticate() succeeds whenever .env already has a fresh
                token. Mint one with `python scripts/auth/globus_auth.py ensure_valid`.
-               A token passed here is held for this process only — it is not
-               persisted, so prefer the helper above for a lasting one.
+               A token passed here is saved to that same file (as the IRI
+               servers do), so later calls and restarts pick it up.
 
     Verifies the token with a real authenticated call to the Compute service
     (listing your own endpoints), so an expired or wrong token is reported here
     instead of surfacing as a confusing failure in a later tool. Other tools also
     read the token fresh from .env, so a refreshed token needs no restart.
     """
-    explicit = bool(token.strip())
+    token = token.strip()
+    explicit = bool(token)
     token = token or _read_env_value(_TOKEN_VAR)
     if not token:
         return (
             f"Error: no token provided and {_TOKEN_VAR} not found in {_ENV_FILE}. "
             "Run `python scripts/auth/globus_auth.py ensure_valid` to mint one, then retry."
         )
-    if token:
-        os.environ[_TOKEN_VAR] = token
-    global _client, _client_token
-    _client = _client_token = None  # force a rebuild against the new token
+    if explicit:
+        # _get_client resolves the token through trinity_env.read_value, which
+        # reads the file and deliberately bypasses os.environ. Persist it the way
+        # the IRI servers do, or a token handed to this call would be ignored in
+        # favour of whatever is already on disk.
+        _update_env(_TOKEN_VAR, token)
+    os.environ[_TOKEN_VAR] = token
     try:
         client = _get_client()
         # Constructing the client does no network I/O, so it cannot tell a good
@@ -253,12 +287,7 @@ async def authenticate(token: str = "") -> str:
         # which would also fail when that endpoint is merely down or draining.
         await asyncio.to_thread(client.get_endpoints)
         if explicit:
-            return (
-                "Globus Compute authenticated (token supplied to this call). "
-                "It is held for this server process only — it was not written to "
-                f"{_ENV_FILE}, so it will not survive a restart. For a persistent "
-                "token run: python scripts/auth/globus_auth.py ensure_valid"
-            )
+            return f"Globus Compute authenticated. Token saved to {_ENV_FILE}."
         return f"Globus Compute authenticated (token from {_ENV_FILE})."
     except Exception as exc:
         return _handle_error(exc)
