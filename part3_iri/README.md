@@ -32,6 +32,17 @@ Lab 09 (remote functions) adds two servers on top of the IRI three:
 | `globus-compute` | Runs a Python function / shell command on a facility MEP (Polaris, Crux) | Globus browser login (`globus_auth.py` — same one as Transfer) |
 | `knowledge` | `retrieve_alcf_docs` — searches the public ALCF/NERSC/OLCF docs | **none** (public endpoint, token-free) |
 
+## The skill
+
+Tools give the agent *reach*; a **skill** gives it *judgment* — the site
+conventions a careful colleague would apply without being asked. This repo ships
+one, [`.claude/skills/submit-job/SKILL.md`](../.claude/skills/submit-job/SKILL.md):
+it tells the agent how to choose between an IRI batch job and a Globus Compute
+function, which queue and allocation to charge, and what to check before
+submitting. Claude Code discovers it automatically when you launch from the repo
+root — you never invoke it by hand. Read it once; it is the most editable part of
+this tutorial, and adapting it to your own project's conventions is the point.
+
 Both are optional and only used in Lab 09; skip them if you're stopping at Lab 08.
 
 ---

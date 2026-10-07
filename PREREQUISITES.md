@@ -40,7 +40,7 @@ named 'globus_sdk'`, and the servers never appear in `/mcp`.
 
 > **`python` vs `python3`.** `.mcp.json` launches each server with `python`. Inside
 > an activated venv (above) that's correct. If you don't use a venv and your system
-> only has `python3`, either create the venv or change the three `command` fields in
+> only has `python3`, either create the venv or change every `command` field in
 > [`.mcp.json`](.mcp.json) to `python3`.
 
 ## 1. An account and a compute allocation (on at least one system)
@@ -183,10 +183,12 @@ No secrets go in this file — each server reads `amsc_agentic_ai/.env` itself a
 startup (Step 2), and re-reads it on every `authenticate()` call so a refreshed
 token is picked up without a restart. As long as `claude` is launched with
 `amsc_agentic_ai/` as your working folder (`cd amsc_agentic_ai && claude`, or
-`code amsc_agentic_ai` for the VS Code extension), all three are picked up
-automatically — nothing to register by hand. A server whose token you haven't set
-simply reports "not authenticated" when you first call it — harmless; set up only
-the facilities you use.
+`code amsc_agentic_ai` for the VS Code extension), all of them are picked up
+automatically — nothing to register by hand. Three are the IRI spine
+(`alcf-iri`, `nersc-iri`, `olcf-iri`); the two Lab 09 servers (`globus-compute`
+and `knowledge`) are optional add-ons you can ignore until you reach that lab.
+A server whose token you haven't set simply reports "not authenticated" when you
+first call it — harmless; set up only the facilities you use.
 
 > **Prefer an officially supported integration if your facility later ships
 > one.** Ask the facility's user support whether a facility-blessed agent/MCP

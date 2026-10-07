@@ -1,9 +1,10 @@
-<!-- Author: Huihuo Zheng, huihuo.zheng@anl.gov -->
-<!-- Copyright: Trinity Science 2026 -->
 ---
 name: submit-job
 description: Stage inputs, run a workload on a DOE facility (IRI batch job or Globus Compute function), monitor it, and report back. Use whenever the user asks to run something on Polaris, Perlmutter, or Frontier.
 ---
+
+<!-- Author: Huihuo Zheng, huihuo.zheng@anl.gov -->
+<!-- Copyright: Trinity Science 2026 -->
 
 # Running a workload on a DOE facility
 

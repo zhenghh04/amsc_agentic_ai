@@ -147,6 +147,12 @@ You now have all four legs the agent needs on real systems: **knowledge**
 **stage → submit → monitor → retrieve** loop, whether the result is a file you
 fetch or a value handed straight back.
 
+You also picked up a fourth kind of context along the way: the repo's one
+**skill**, [`.claude/skills/submit-job/SKILL.md`](../.claude/skills/submit-job/SKILL.md).
+Claude Code loaded it automatically and used it to decide *which* of these two
+paths to take and what to charge — judgment, not reach. Open it now that you've
+seen both paths; it will read very differently than it would have before Lab 08.
+
 This is the last lab in Part 3. From here, the same loop scales to autonomous
 multi-job campaigns — see [GOING_FURTHER.md](../GOING_FURTHER.md) for that horizon.
 

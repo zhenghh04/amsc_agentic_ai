@@ -16,7 +16,7 @@ function (or a shell command) on a compute node and hands back the return value.
 The taught path is **ALCF / Polaris** (the facility MEP that Session 02 of the
 Service-Enabled-Science workshop validated). The tools are endpoint-driven, so
 the *same* tools reach any facility MEP once you have a token for it — see the
-"Extending to other facilities" note in part3_iri/11_remote_functions.md.
+"Extending to other facilities" note in part3_iri/09_remote_functions.md.
 
 TWO LOAD-BEARING LESSONS (ported from SES Session 02)
 -----------------------------------------------------
@@ -40,11 +40,11 @@ by ``scripts/auth/globus_auth.py``). The token is re-read from the file on every
 call, so a refresh mid-session is picked up with no restart.
 """
 
+import ast
 import asyncio
 import json
 import logging
 import os
-import re
 import sys
 import textwrap
 from pathlib import Path
@@ -161,11 +161,19 @@ def _handle_error(exc: Exception) -> str:
 
 
 def _first_def_name(source: str) -> str:
-    """Return the name of the first top-level `def`/`async def` in source."""
-    for line in source.splitlines():
-        m = re.match(r"^\s*(?:async\s+)?def\s+([A-Za-z_]\w*)\s*\(", line)
-        if m:
-            return m.group(1)
+    """Return the name of the first *top-level* `def`/`async def` in source.
+
+    Parses the AST and looks only at module-level nodes: a regex over lines
+    would happily return a nested helper or a class method, neither of which is
+    registrable as the function the caller meant.
+    """
+    try:
+        tree = ast.parse(textwrap.dedent(source))
+    except SyntaxError:
+        return ""
+    for node in tree.body:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            return node.name
     return ""
 
 
@@ -215,8 +223,10 @@ async def authenticate(token: str = "") -> str:
                bare authenticate() succeeds whenever .env already has a fresh
                token. Mint one with `python scripts/auth/globus_auth.py ensure_valid`.
 
-    Verifies the token by constructing a client. Other tools also read the token
-    fresh from .env, so this is mainly a connectivity check.
+    Verifies the token with a real authenticated call to the Compute service
+    (listing your own endpoints), so an expired or wrong token is reported here
+    instead of surfacing as a confusing failure in a later tool. Other tools also
+    read the token fresh from .env, so a refreshed token needs no restart.
     """
     token = token or _read_env_value(_TOKEN_VAR)
     if not token:
@@ -228,7 +238,12 @@ async def authenticate(token: str = "") -> str:
         os.environ[_TOKEN_VAR] = token
     _clients.clear()
     try:
-        _get_client()
+        client = _get_client()
+        # Constructing the client does no network I/O, so it cannot tell a good
+        # token from a bad one. Make an account-scoped call instead: listing your
+        # own endpoints depends only on the token, unlike probing a specific MEP,
+        # which would also fail when that endpoint is merely down or draining.
+        await asyncio.to_thread(client.get_endpoints)
         return f"Globus Compute authenticated (token from {_ENV_FILE})."
     except Exception as exc:
         return _handle_error(exc)
@@ -459,6 +474,8 @@ async def run_shell_command(
     endpoint_id: str,
     user_endpoint_config_json: str = "{}",
     timeout: int = 120,
+    max_chars: int = 12000,
+    full: bool = False,
 ) -> str:
     """Run a shell command on a compute node via the MEP and return its output.
 
@@ -473,6 +490,12 @@ async def run_shell_command(
             for a facility MEP you MUST include "account".
         timeout: Seconds to wait for the result before returning the task_id so
             you can poll get_result yourself (default 120, max 1800).
+        max_chars: Cap on returned output length (default 12000). 0 = no cap.
+        full: If true, return the full output regardless of max_chars.
+
+    Output is bounded the same way get_result bounds it, so a chatty command
+    cannot flood the agent's context. If the command fails, the error is
+    returned immediately rather than being reported as "still running".
 
     For anything longer-running than a quick probe, register a function and use
     run_function + get_result instead. Requires a valid token.
@@ -523,22 +546,42 @@ async def run_shell_command(
         return _handle_error(exc)
 
     # Poll for the result up to `timeout`, then hand back the task_id.
+    #
+    # Poll get_task() rather than retrying get_result() blindly: only a *pending*
+    # task should keep us in the loop. A remote exception, a bad task id, or an
+    # expired token must surface immediately — swallowing those would report a
+    # hard failure as "still running" once the timeout expired.
     waited = 0.0
     delay = 2.0
-    while waited < timeout:
+    while True:
         try:
-            result = await asyncio.to_thread(client.get_result, task_id)
-            return _fmt({"task_id": task_id, "command": command, "result": result})
-        except Exception:
-            await asyncio.sleep(delay)
-            waited += delay
-            delay = min(delay * 1.5, 15.0)
-    return _fmt({
-        "task_id": task_id,
-        "command": command,
-        "status": "still running",
-        "note": f"Not finished within {timeout}s — poll get_result('{task_id}').",
-    })
+            task = await asyncio.to_thread(client.get_task, task_id)
+        except Exception as exc:
+            return _handle_error(exc)
+        if not (isinstance(task, dict) and task.get("pending")):
+            break
+        if waited >= timeout:
+            return _fmt({
+                "task_id": task_id,
+                "command": command,
+                "status": "still running",
+                "note": f"Not finished within {timeout}s — poll get_result('{task_id}').",
+            })
+        await asyncio.sleep(delay)
+        waited += delay
+        delay = min(delay * 1.5, 15.0)
+
+    # Terminal state: fetch the value once. If the remote function raised, the
+    # SDK re-raises it here and _handle_error turns it into a readable message.
+    try:
+        result = await asyncio.to_thread(client.get_result, task_id)
+    except Exception as exc:
+        return _handle_error(exc)
+    bounded = bound_nested_strings(
+        result, max_chars=clamp_int(max_chars, minimum=0, maximum=200000),
+        full=full, mode="tail",
+    )
+    return _fmt({"task_id": task_id, "command": command, "result": bounded})
 
 
 # ── Entry point ──────────────────────────────────────────────────────────
