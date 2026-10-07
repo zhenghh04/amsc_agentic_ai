@@ -85,6 +85,14 @@ anything shared or version-controlled; keep it out of git) and refresh it
 automatically thereafter. Check the Globus status any time with
 `python scripts/auth/globus_auth.py status`.
 
+> **ALCF-only alternative:** ALCF ships an official token CLI,
+> [`alcf-tokens`](https://pypi.org/project/alcf-tokens/). The bundled helpers above
+> are the recommended path here (cross-facility, zero extra deps, and they write the
+> `.env` the MCP servers read), but if you already use `alcf-tokens` you can feed its
+> token to the ALCF server: `ALCF_IRI_TOKEN=$(alcf-tokens get-token iri)`. The
+> trade-offs are laid out in
+> [Bonus A](going_further/A_raw_facility_rest.md#a-note-on-tokens--alcf-tokens-vs-the-bundled-helpers).
+
 ### OLCF / Frontier — a manually issued API token
 
 OLCF's IRI does **not** use a browser Globus flow. Instead, mint a token in the
