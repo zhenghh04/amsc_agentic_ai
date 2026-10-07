@@ -333,8 +333,10 @@ won't follow, which looks like a silent "no response".
 curl -fsSL https://opencode.ai/install | bash
 #    (or: npm install -g opencode-ai  — needs the Node from Step 1)
 
-# 2. Export your MAG PAT as AMSC_I2_API_KEY (the same token from Step 2).
-export AMSC_I2_API_KEY=<paste-your-MAG-PAT-here>
+# 2. Put your MAG PAT in AMSC_I2_API_KEY (the same token from Step 2) WITHOUT
+#    leaving it in your shell history — read it in, don't type it on the command line:
+read -rsp "MAG PAT: " AMSC_I2_API_KEY; echo
+export AMSC_I2_API_KEY
 
 # 3. Launch opencode from the repo root (where opencode.jsonc lives):
 cd /path/to/amsc_agentic_ai

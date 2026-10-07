@@ -43,11 +43,12 @@ The track has three parts:
   editor, and a **MAG Personal Access Token** — no allocation, no HPC account.
   You drive a small simulation, a small training run, and an inference call, and
   learn how a prompt becomes a tool call.
-- **Part 2 — Running Claude on HPC Systems** runs `claude` **directly on a login
-  node** of Polaris, Perlmutter, or Frontier — an interactive account on one of
-  them is all you need. The agent drives the scheduler's own commands
-  (`qsub`/`qstat` on Polaris, `sbatch`/`squeue` on Perlmutter/Frontier).
-- **Part 3 — Orchestrating Job Submission via IRI** keeps `claude` **on your
+- **Part 2 — Running the Agent on HPC Systems** runs your agent (`claude` or
+  `opencode`) **directly on a login node** of Polaris, Perlmutter, or Frontier — an
+  interactive account on one of them is all you need. The agent drives the
+  scheduler's own commands (`qsub`/`qstat` on Polaris, `sbatch`/`squeue` on
+  Perlmutter/Frontier).
+- **Part 3 — Orchestrating Job Submission via IRI** keeps the **agent on your
   laptop** and reaches all three facilities through bundled MCP servers instead
   (needs [PREREQUISITES.md](PREREQUISITES.md)).
 
@@ -118,7 +119,7 @@ Every lab is self-contained with: **objectives · time · prerequisites · conce
 ```text
 Part 1 — laptop only                Part 2 — native, on your HPC system
 ────────────────────                ────────────────────────────────────
-00 set up Claude Code + MAG          05 run Claude natively + a first job
+00 set up Claude Code + MAG          05 run the agent natively + a first job
 01 simulation ─┐
 02 training ───┤ the spine
 03 inference ──┘                     Part 3 — laptop + IRI/MCP (3 facilities)
@@ -140,8 +141,9 @@ Part 1 — laptop only                Part 2 — native, on your HPC system
             ▼
    ┌─────────────────┐     decides which tool,
    │   the agent     │────▶ with which arguments
-   │  (Claude, via   │
-   │   MAG gateway)  │◀──── reads the result, decides the next step
+   │  (Claude or     │
+   │  opencode, via  │
+   │   the MAG)      │◀──── reads the result, decides the next step
    └─────────────────┘
             │ tool call
             ▼
