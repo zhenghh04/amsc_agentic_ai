@@ -102,8 +102,12 @@ _registered: dict[str, str] = {}
 # Cache the source wrapper used by run_shell_command so we register it once.
 _shell_func_id: str | None = None
 
-# Client cache keyed by token prefix so a rotated token rebuilds the client.
-_clients: dict[str, object] = {}
+# Single cached client plus the exact token it was built from. Compared in full,
+# not by prefix: two different tokens can share a prefix, and a stale authorizer
+# would then survive a rotation — the opposite of this server's re-read-the-token
+# behaviour.
+_client: object | None = None
+_client_token: str | None = None
 
 
 def _fmt(data) -> str:
@@ -137,12 +141,12 @@ def _get_client():
             f"No {_TOKEN_VAR} in {_ENV_FILE}. Mint one with: "
             "python scripts/auth/globus_auth.py ensure_valid"
         )
-    cache_key = token[:16]
-    if cache_key not in _clients:
+    global _client, _client_token
+    if _client is None or token != _client_token:
         Client, AccessTokenAuthorizer = _globus_compute_deps()
-        _clients.clear()  # only ever hold the current token's client
-        _clients[cache_key] = Client(authorizer=AccessTokenAuthorizer(token))
-    return _clients[cache_key]
+        _client = Client(authorizer=AccessTokenAuthorizer(token))
+        _client_token = token
+    return _client
 
 
 def _handle_error(exc: Exception) -> str:
@@ -236,7 +240,8 @@ async def authenticate(token: str = "") -> str:
         )
     if token:
         os.environ[_TOKEN_VAR] = token
-    _clients.clear()
+    global _client, _client_token
+    _client = _client_token = None  # force a rebuild against the new token
     try:
         client = _get_client()
         # Constructing the client does no network I/O, so it cannot tell a good
@@ -567,8 +572,9 @@ async def run_shell_command(
                 "status": "still running",
                 "note": f"Not finished within {timeout}s — poll get_result('{task_id}').",
             })
-        await asyncio.sleep(delay)
-        waited += delay
+        sleep_for = min(delay, timeout - waited)
+        await asyncio.sleep(sleep_for)
+        waited += sleep_for
         delay = min(delay * 1.5, 15.0)
 
     # Terminal state: fetch the value once. If the remote function raised, the
