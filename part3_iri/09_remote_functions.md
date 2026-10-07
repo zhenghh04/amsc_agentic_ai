@@ -18,7 +18,7 @@ go fetch. That's **Globus Compute**: the facility runs a **Multi-User Endpoint
 or babysit an endpoint; you just name it.
 
 The taught path here is **ALCF / Polaris**. The tools are endpoint-driven, so the
-same four tools reach any facility MEP once you have a token for it (see
+same Compute tools reach any facility MEP once you have a token for it (see
 *Extending to other facilities* at the end).
 
 ---
