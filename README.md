@@ -66,7 +66,7 @@ you submit something.
 
 - **HPC / computational-science users new to agents** — you know your science and
   your systems, but "agent," "MCP," and "tool call" are new.
-- **Anyone with AmSC access** who wants to drive Claude from their editor through
+- **Anyone with AmSC access** who wants to drive an agent from their editor through
   MAG, and learn to make it repeatable across DOE facilities.
 
 No prior AI/agent experience is assumed. Basic command-line comfort helps.
@@ -75,8 +75,8 @@ No prior AI/agent experience is assumed. Basic command-line comfort helps.
 
 ## Part 1 — Fundamentals (laptop only)
 
-Runs entirely on your laptop with Claude Code + MAG (VS Code optional) — no
-allocation, no HPC account.
+Runs entirely on your laptop with Claude Code or opencode + MAG (VS Code
+optional) — no allocation, no HPC account.
 
 | Lab | Title | Time | Needs |
 | --- | --- | --- | --- |
@@ -88,20 +88,21 @@ allocation, no HPC account.
 Labs 01 · 02 · 03 are the **spine** — simulation, training, inference — the same
 three workloads you'll scale up in Parts 2 and 3.
 
-## Part 2 — Running Claude on HPC Systems
+## Part 2 — Running the Agent on HPC Systems
 
-`claude` runs **on a login node** of Polaris, Perlmutter, or Frontier — no MCP
-server, no allocation-gated setup, just an interactive account on one of them.
+Your agent (`claude` or `opencode`) runs **on a login node** of Polaris,
+Perlmutter, or Frontier — no MCP server, no allocation-gated setup, just an
+interactive account on one of them.
 Because MAG is a public-cloud endpoint, the login node reaches it directly — no
 tunnel required. See [part2_hpc/README.md](part2_hpc/README.md) for the full intro.
 
 | Lab | Title | Time | Approx cost |
 | --- | --- | --- | --- |
-| [05](part2_hpc/05_hpc_uan.md) | Run Claude natively on your system + a first job | 35–50 min | ~1 node-min |
+| [05](part2_hpc/05_hpc_uan.md) | Run the agent natively on your system + a first job | 35–50 min | ~1 node-min |
 
 ## Part 3 — Orchestrating Job Submission via IRI (all three facilities)
 
-`claude` stays **on your laptop**; reaching Polaris, Perlmutter, and Frontier
+The agent stays **on your laptop**; reaching Polaris, Perlmutter, and Frontier
 happens entirely through the bundled `alcf-iri`, `nersc-iri`, and `olcf-iri` MCP
 servers' named tools. See [part3_iri/README.md](part3_iri/README.md) for the full
 intro. **Do [PREREQUISITES.md](PREREQUISITES.md) first** — an account and
