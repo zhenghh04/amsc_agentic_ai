@@ -352,12 +352,14 @@ round-trip, exactly as in Step 4 for Claude Code. Models other than the default
 (`mag/claude-sonnet-4-6`) are switchable from opencode's model picker — the
 `provider.mag.models` block in `opencode.jsonc` lists the ones MAG serves.
 
-> **The MCP servers don't load yet — that's expected in Part 1.** `opencode.jsonc`
+> **The MCP servers aren't usable yet — that's expected in Part 1.** `opencode.jsonc`
 > already wires all five servers, but they need the **Part 3** Python dependencies
 > (`requirements.txt`, installed in [PREREQUISITES.md](../PREREQUISITES.md)) before
-> they'll start — until then they'd fail with `ModuleNotFoundError` and won't show
-> up under `/mcp`. Nothing to do here in Part 1; `/mcp` lists them once you reach
-> Part 3. This is the same for Claude Code.
+> they can start. opencode still *tries* to launch them, so until those deps are in
+> place they show up as **failed/unavailable** under `/mcp` (if at all) and their
+> tools won't work — that's fine; there's nothing to do here in Part 1. Once the
+> Part 3 deps are installed they start cleanly and `/mcp` lists them. Same for
+> Claude Code.
 
 > **Prefer ALCF Inference as the model source?** opencode takes any
 > OpenAI-compatible provider. ALCF's Inference Service exposes one per cluster at

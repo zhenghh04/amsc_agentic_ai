@@ -80,7 +80,7 @@ optional) — no allocation, no HPC account.
 
 | Lab | Title | Time | Needs |
 | --- | --- | --- | --- |
-| [00](part1_fundamentals/00_setup_claude_mag.md) | Set up Claude Code and MAG | 15–25 min | A laptop; a MAG Personal Access Token |
+| [00](part1_fundamentals/00_setup_claude_mag.md) | Set up your agent (Claude Code or opencode) and MAG | 15–25 min | A laptop; a MAG Personal Access Token |
 | [01](part1_fundamentals/01_local_simulation.md) | The 101: drive a small **local** simulation | 30–40 min | Lab 00 |
 | [02](part1_fundamentals/02_local_training.md) | Drive a small **local** training run | 30–40 min | Lab 01 |
 | [03](part1_fundamentals/03_local_inference.md) | Drive a small **local** inference run | 30–40 min | Lab 01 |
@@ -120,7 +120,7 @@ Every lab is self-contained with: **objectives · time · prerequisites · conce
 ```text
 Part 1 — laptop only                Part 2 — native, on your HPC system
 ────────────────────                ────────────────────────────────────
-00 set up Claude Code + MAG          05 run the agent natively + a first job
+00 set up your agent + MAG           05 run the agent natively + a first job
 01 simulation ─┐
 02 training ───┤ the spine
 03 inference ──┘                     Part 3 — laptop + IRI/MCP (3 facilities)
