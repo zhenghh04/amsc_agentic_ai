@@ -93,22 +93,28 @@ These are the gotchas the workshop (SES Session 02) hit, now baked into the tool
 1. **Register from source, not a pickle.** The MEP workers may run a different
    Python version than your laptop. Pickling a function across versions throws a
    `ManagerLost` serialization error. `register_function` ships the function's
-   **source**, so the worker recompiles it locally — version-safe. Corollary: put
-   **every `import` inside the function body**; the worker only has what the
-   source carries.
+   **source**, so the worker recompiles it locally — version-safe. Because the
+   *whole* source is shipped and recompiled, a top-level `import` travels with it
+   and runs on the worker. Convention anyway: put **every `import` inside the
+   function body**. It costs nothing, it keeps each function self-contained, and
+   it is what makes the same code portable to the pickle path — where the worker
+   gets only the callable and a module-level import would *not* come along.
 2. **Mind the filesystem the node can see.** Functions run *on the compute node*,
    so any path they touch must be on a node-visible filesystem — on Polaris that's
    `home`, `eagle`, or `grand`. **Polaris cannot see Aurora's `/flare`.** The
    server injects `#PBS -l filesystems=home:eagle:grand` for the known MEPs unless
    you set your own `scheduler_options`.
 
-Try breaking lesson 1 on purpose:
+Try breaking lesson 1 on purpose — the part the worker genuinely cannot supply:
 
-> Register a function that uses `numpy` but put the `import numpy` at the top of
-> the file, outside the function. Run it and show me what happens.
+> Register a function that calls `numpy.zeros(4).mean()` but don't import numpy
+> anywhere — not in the body, not at the top. Run it and show me what happens.
 
-Watch it fail at the worker, then move the import inside and watch it pass. One
-wasted node-minute buys the intuition.
+The worker recompiles your source and hits a `NameError: name 'numpy' is not
+defined`, because nothing in the shipped source ever bound that name. Add
+`import numpy` **inside the function body**, re-register, and watch it pass. One
+wasted node-minute buys the intuition: the worker has only what your source
+carries.
 
 ## Step 4 — Wrap a command (and an executable)
 
@@ -138,7 +144,8 @@ stand up, just your allocation and a UUID.
 - [ ] `get_endpoint_status("polaris")` reported the endpoint online.
 - [ ] A registered function ran **on a Polaris node** and you read its return
       value (hostname + GPU).
-- [ ] You saw a top-level `import` fail at the worker and an in-body import pass.
+- [ ] You saw a missing import fail at the worker (`NameError`) and an in-body
+      import fix it.
 - [ ] You ran a one-off command with `run_shell_command`.
 
 You now have all four legs the agent needs on real systems: **knowledge**

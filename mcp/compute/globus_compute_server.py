@@ -226,12 +226,15 @@ async def authenticate(token: str = "") -> str:
                back to GLOBUS_COMPUTE_TOKEN in .env (re-read at call time), so a
                bare authenticate() succeeds whenever .env already has a fresh
                token. Mint one with `python scripts/auth/globus_auth.py ensure_valid`.
+               A token passed here is held for this process only — it is not
+               persisted, so prefer the helper above for a lasting one.
 
     Verifies the token with a real authenticated call to the Compute service
     (listing your own endpoints), so an expired or wrong token is reported here
     instead of surfacing as a confusing failure in a later tool. Other tools also
     read the token fresh from .env, so a refreshed token needs no restart.
     """
+    explicit = bool(token.strip())
     token = token or _read_env_value(_TOKEN_VAR)
     if not token:
         return (
@@ -249,6 +252,13 @@ async def authenticate(token: str = "") -> str:
         # own endpoints depends only on the token, unlike probing a specific MEP,
         # which would also fail when that endpoint is merely down or draining.
         await asyncio.to_thread(client.get_endpoints)
+        if explicit:
+            return (
+                "Globus Compute authenticated (token supplied to this call). "
+                "It is held for this server process only — it was not written to "
+                f"{_ENV_FILE}, so it will not survive a restart. For a persistent "
+                "token run: python scripts/auth/globus_auth.py ensure_valid"
+            )
         return f"Globus Compute authenticated (token from {_ENV_FILE})."
     except Exception as exc:
         return _handle_error(exc)
