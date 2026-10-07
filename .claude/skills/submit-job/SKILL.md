@@ -75,13 +75,13 @@ approximate cost.
 
 - **IRI batch jobs can be cancelled.** If one is stuck or misbehaving, call
   `cancel_job` — that really does stop it and stop the billing.
-- **Globus Compute tasks cannot.** The SDK has no cancellation API: once a task
-  is registered it runs to completion. Giving up on `get_result` only stops you
-  *watching* it — the task stays queued or running and stays billed, now
-  unobserved. So the limit has to be set **before** submission: put a short
-  `walltime` in `user_endpoint_config` (e.g. `"walltime": "00:05:00"`) and keep
-  the node count at 1. That bound is the only thing that will actually stop a
-  runaway task.
+- **Globus Compute tasks cannot.** The SDK has no cancellation API, so giving up
+  on `get_result` only stops you *watching* the task — it stays eligible to run.
+  Queued, it costs nothing; once the MEP allocates nodes to it, it consumes and
+  bills them until it finishes, fails, or hits the scheduler walltime. Nothing
+  you do afterwards shortens that. So set the bound **before** submission: a
+  short `walltime` in `user_endpoint_config` (e.g. `"walltime": "00:05:00"`) and
+  1 node. That walltime is the only thing that will stop a runaway task.
 
 ## Common causes of failure
 

@@ -216,10 +216,11 @@ skip ahead and come back — nothing here is a dead end.
 
 **A task is running away and you want to stop it**
 : You can't. Unlike an IRI batch job (`cancel_job`), a Globus Compute task has no
-  cancel — the SDK runs it to completion once registered. Closing the chat or
-  giving up on `get_result` only stops you *watching* it; it keeps running and
-  keeps billing. Set the bound up front instead: a short `"walltime"` in
-  `user_endpoint_config` and 1 node.
+  cancel. Closing the chat or giving up on `get_result` only stops you *watching*
+  it — the task stays eligible to run, and once nodes are allocated to it, it
+  bills them until it finishes, fails, or hits the scheduler walltime. Set that
+  bound up front instead: a short `"walltime"` in `user_endpoint_config` and 1
+  node.
 
 **Auth / 401 on a compute call**
 : The compute token expired. Re-run `python scripts/auth/globus_auth.py
