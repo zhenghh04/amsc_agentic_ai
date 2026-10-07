@@ -334,8 +334,11 @@ curl -fsSL https://opencode.ai/install | bash
 #    (or: npm install -g opencode-ai  — needs the Node from Step 1)
 
 # 2. Put your MAG PAT in AMSC_I2_API_KEY (the same token from Step 2) WITHOUT
-#    leaving it in your shell history — read it in, don't type it on the command line:
-read -rsp "MAG PAT: " AMSC_I2_API_KEY; echo
+#    leaving it in your shell history — read it in, don't type it on the command line.
+#    (printf + `read -rs` works in both bash and zsh; bash's `read -p` prompt flag
+#     does NOT — in zsh, macOS's default shell, -p means "read from a coprocess".)
+printf "MAG PAT: "
+read -rs AMSC_I2_API_KEY; echo
 export AMSC_I2_API_KEY
 
 # 3. Launch opencode from the repo root (where opencode.jsonc lives):
@@ -344,10 +347,17 @@ opencode
 ```
 
 opencode picks up `opencode.jsonc` automatically. At the prompt, type the same
-Step 4 verification message; the reply comes back through MAG, and
-`/mcp` lists the five tutorial servers. Models other than the default
+Step 4 verification message; the reply comes back through MAG — that's the Part 1
+round-trip, exactly as in Step 4 for Claude Code. Models other than the default
 (`mag/claude-sonnet-4-6`) are switchable from opencode's model picker — the
 `provider.mag.models` block in `opencode.jsonc` lists the ones MAG serves.
+
+> **The MCP servers don't load yet — that's expected in Part 1.** `opencode.jsonc`
+> already wires all five servers, but they need the **Part 3** Python dependencies
+> (`requirements.txt`, installed in [PREREQUISITES.md](../PREREQUISITES.md)) before
+> they'll start — until then they'd fail with `ModuleNotFoundError` and won't show
+> up under `/mcp`. Nothing to do here in Part 1; `/mcp` lists them once you reach
+> Part 3. This is the same for Claude Code.
 
 > **Prefer ALCF Inference as the model source?** opencode takes any
 > OpenAI-compatible provider. ALCF's Inference Service exposes one per cluster at
