@@ -155,6 +155,19 @@ def _build_client(token: str):
     return Client(authorizer=AccessTokenAuthorizer(token))
 
 
+def _still_current(client) -> bool:
+    """True when `client` is still the live client for the on-disk token.
+
+    Registration awaits a network call, during which a concurrent request may
+    rotate the token and clear the identity-scoped caches. Publishing blindly
+    after the await would undo that invalidation.
+    """
+    try:
+        return _get_client() is client
+    except Exception:
+        return False
+
+
 def _get_client():
     """Build (or reuse) a Globus Compute Client from the on-disk token.
 
@@ -381,8 +394,19 @@ async def register_function(
             func_id = await asyncio.to_thread(
                 client.register_function, func, description=description or name
             )
-        _registered[name] = str(func_id)
-        return _fmt({"function_name": name, "function_id": str(func_id)})
+        # Registration was awaited, so the token may have rotated underneath us
+        # and another call may already have cleared the registry. Only publish
+        # when this client is still the current one, or we would resurrect a
+        # previous identity's UUID.
+        if _still_current(client):
+            _registered[name] = str(func_id)
+            return _fmt({"function_name": name, "function_id": str(func_id)})
+        return _fmt({
+            "function_name": name,
+            "function_id": str(func_id),
+            "note": "Credentials changed during registration, so this name was "
+                    "not cached. Pass the function_id directly, or register again.",
+        })
     except Exception as exc:
         return _handle_error(exc)
 
@@ -394,6 +418,10 @@ async def list_registered_functions() -> str:
     This is an in-process registry; it resets when the server restarts. Functions
     stay registered on the Globus Compute service and can still be run by UUID.
     """
+    try:
+        _get_client()  # detects a token rotation and drops the stale registry
+    except Exception as exc:
+        return _handle_error(exc)
     if not _registered:
         return "No functions registered in this session. Use register_function first."
     return _fmt(_registered)
@@ -584,9 +612,10 @@ async def run_shell_command(
     )
     try:
         client = _get_client()
-        if _shell_func_id is None:
+        shell_func_id = _shell_func_id
+        if shell_func_id is None:
             if hasattr(client, "register_source_code"):
-                _shell_func_id = str(await asyncio.to_thread(
+                shell_func_id = str(await asyncio.to_thread(
                     client.register_source_code,
                     source=shell_src, function_name="_run_cmd",
                     description="Run a shell command on the endpoint",
@@ -594,12 +623,16 @@ async def run_shell_command(
             else:
                 ns: dict = {}
                 exec(shell_src, ns)  # noqa: S102
-                _shell_func_id = str(await asyncio.to_thread(
+                shell_func_id = str(await asyncio.to_thread(
                     client.register_function, ns["_run_cmd"],
                     description="Run a shell command on the endpoint",
                 ))
+            # Held locally so this call can still submit, but only cached for
+            # later calls if the identity didn't change during the await.
+            if _still_current(client):
+                _shell_func_id = shell_func_id
         task_id = await asyncio.to_thread(
-            _submit, client, ep, _shell_func_id, (command,), {}, cfg
+            _submit, client, ep, shell_func_id, (command,), {}, cfg
         )
         if not task_id:
             return "Error: submission returned no task_id."
