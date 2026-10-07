@@ -2,7 +2,7 @@
 
 This file is for **Part 3** — the local-laptop-plus-MCP-server way of reaching
 Polaris, Perlmutter, and Frontier ([part3_iri/README.md](part3_iri/README.md)
-has the full intro). If you're doing **Part 2** (running `claude` directly on a
+has the full intro). If you're doing **Part 2** (running your agent directly on a
 login node) instead, skip this file entirely — [Lab 05](part2_hpc/05_hpc_uan.md)
 states its own, much lighter prerequisite (just an interactive account on one
 system).
@@ -146,7 +146,7 @@ raises a clear error if neither is present.
 > reach your machine when GCP is active (the tray icon is running). Transfers to
 > facility-to-facility paths work regardless.
 
-## 3. The IRI MCP servers, configured in Claude Code
+## 3. The IRI MCP servers, configured for your agent
 
 This is the new piece. You'll add the MCP servers that expose each facility's
 **IRI + Globus** capabilities as tools — submit a job, check status, list/read
@@ -183,14 +183,20 @@ All five are wired up in [`.mcp.json`](.mcp.json) in this folder:
 
 No secrets go in this file — each server reads `amsc_agentic_ai/.env` itself at
 startup (Step 2), and re-reads it on every `authenticate()` call so a refreshed
-token is picked up without a restart. As long as `claude` is launched with
-`amsc_agentic_ai/` as your working folder (`cd amsc_agentic_ai && claude`, or
-`code amsc_agentic_ai` for the VS Code extension), all of them are picked up
-automatically — nothing to register by hand. Three are the IRI spine
+token is picked up without a restart. As long as your agent is launched with
+`amsc_agentic_ai/` as its working folder (`cd amsc_agentic_ai && claude`,
+`cd amsc_agentic_ai && opencode`, or `code amsc_agentic_ai` for the VS Code
+extension), all of them are picked up automatically — nothing to register by hand. Three are the IRI spine
 (`alcf-iri`, `nersc-iri`, `olcf-iri`); the two Lab 09 servers (`globus-compute`
 and `knowledge`) are optional add-ons you can ignore until you reach that lab.
 A server whose token you haven't set simply reports "not authenticated" when you
 first call it — harmless; set up only the facilities you use.
+
+> **Using opencode instead of Claude Code?** The repo also ships
+> [`opencode.jsonc`](opencode.jsonc), which wires the *same five servers* (plus a
+> MAG model provider and this folder's `AGENTS.md`) into opencode. Launch
+> `opencode` from `amsc_agentic_ai/` and the identical tools appear under `/mcp`.
+> See [Lab 00 Appendix C](part1_fundamentals/00_setup_claude_mag.md#appendix-c--the-opencode-path-agent-agnostic-optional).
 
 > **Prefer an officially supported integration if your facility later ships
 > one.** Ask the facility's user support whether a facility-blessed agent/MCP
@@ -200,7 +206,7 @@ first call it — harmless; set up only the facilities you use.
 
 ## 4. Verify the connection (read-only, free)
 
-Inside `claude`, from `amsc_agentic_ai/`:
+Inside `claude` (or `opencode`), from `amsc_agentic_ai/`:
 
 ```text
 /mcp

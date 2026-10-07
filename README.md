@@ -9,11 +9,17 @@
 > stripped down to the smallest self-contained form you can run and learn from.
 
 A hands-on tutorial for getting started with **agentic AI** as an AmSC
-(American Science Cloud) user. You'll set up an AI coding agent — **Claude Code**,
-pointed at the **AmSC Model Access Gateway (MAG)** (and optionally run inside
-**VS Code**) — and use it to do real scientific-computing work, first on your
-laptop and then on real DOE HPC systems: **Polaris** (ALCF), **Perlmutter**
-(NERSC), and **Frontier** (OLCF).
+(American Science Cloud) user. You'll set up an AI coding agent — **Claude Code**
+(or the open-source **opencode**; see Lab 00 Appendix C), pointed at the **AmSC
+Model Access Gateway (MAG)** (and optionally run inside **VS Code**) — and use it
+to do real scientific-computing work, first on your laptop and then on real DOE
+HPC systems: **Polaris** (ALCF), **Perlmutter** (NERSC), and **Frontier** (OLCF).
+
+The track is **agent-agnostic**: every lab drives the agent's **tools** and the
+shared `AGENTS.md` conventions — and in Part 3 those tools are the bundled **MCP
+servers** — so it runs identically under Claude Code (`.mcp.json`) or opencode
+(`opencode.jsonc`), both billed to your AmSC project through MAG. Where a lab shows
+the `claude` command, opencode users run `opencode` instead.
 
 You describe a task in plain English. The agent reasons about it, writes code,
 runs tools, submits jobs, reads the results, and iterates.
@@ -37,11 +43,12 @@ The track has three parts:
   editor, and a **MAG Personal Access Token** — no allocation, no HPC account.
   You drive a small simulation, a small training run, and an inference call, and
   learn how a prompt becomes a tool call.
-- **Part 2 — Running Claude on HPC Systems** runs `claude` **directly on a login
-  node** of Polaris, Perlmutter, or Frontier — an interactive account on one of
-  them is all you need. The agent drives the scheduler's own commands
-  (`qsub`/`qstat` on Polaris, `sbatch`/`squeue` on Perlmutter/Frontier).
-- **Part 3 — Orchestrating Job Submission via IRI** keeps `claude` **on your
+- **Part 2 — Running the Agent on HPC Systems** runs your agent (`claude` or
+  `opencode`) **directly on a login node** of Polaris, Perlmutter, or Frontier — an
+  interactive account on one of them is all you need. The agent drives the
+  scheduler's own commands (`qsub`/`qstat` on Polaris, `sbatch`/`squeue` on
+  Perlmutter/Frontier).
+- **Part 3 — Orchestrating Job Submission via IRI** keeps the **agent on your
   laptop** and reaches all three facilities through bundled MCP servers instead
   (needs [PREREQUISITES.md](PREREQUISITES.md)).
 
@@ -59,7 +66,7 @@ you submit something.
 
 - **HPC / computational-science users new to agents** — you know your science and
   your systems, but "agent," "MCP," and "tool call" are new.
-- **Anyone with AmSC access** who wants to drive Claude from their editor through
+- **Anyone with AmSC access** who wants to drive an agent from their editor through
   MAG, and learn to make it repeatable across DOE facilities.
 
 No prior AI/agent experience is assumed. Basic command-line comfort helps.
@@ -68,12 +75,12 @@ No prior AI/agent experience is assumed. Basic command-line comfort helps.
 
 ## Part 1 — Fundamentals (laptop only)
 
-Runs entirely on your laptop with Claude Code + MAG (VS Code optional) — no
-allocation, no HPC account.
+Runs entirely on your laptop with Claude Code or opencode + MAG (VS Code
+optional) — no allocation, no HPC account.
 
 | Lab | Title | Time | Needs |
 | --- | --- | --- | --- |
-| [00](part1_fundamentals/00_setup_claude_mag.md) | Set up Claude Code and MAG | 15–25 min | A laptop; a MAG Personal Access Token |
+| [00](part1_fundamentals/00_setup_claude_mag.md) | Set up your agent (Claude Code or opencode) and MAG | 15–25 min | A laptop; a MAG Personal Access Token |
 | [01](part1_fundamentals/01_local_simulation.md) | The 101: drive a small **local** simulation | 30–40 min | Lab 00 |
 | [02](part1_fundamentals/02_local_training.md) | Drive a small **local** training run | 30–40 min | Lab 01 |
 | [03](part1_fundamentals/03_local_inference.md) | Drive a small **local** inference run | 30–40 min | Lab 01 |
@@ -81,20 +88,21 @@ allocation, no HPC account.
 Labs 01 · 02 · 03 are the **spine** — simulation, training, inference — the same
 three workloads you'll scale up in Parts 2 and 3.
 
-## Part 2 — Running Claude on HPC Systems
+## Part 2 — Running the Agent on HPC Systems
 
-`claude` runs **on a login node** of Polaris, Perlmutter, or Frontier — no MCP
-server, no allocation-gated setup, just an interactive account on one of them.
+Your agent (`claude` or `opencode`) runs **on a login node** of Polaris,
+Perlmutter, or Frontier — no MCP server, no allocation-gated setup, just an
+interactive account on one of them.
 Because MAG is a public-cloud endpoint, the login node reaches it directly — no
 tunnel required. See [part2_hpc/README.md](part2_hpc/README.md) for the full intro.
 
 | Lab | Title | Time | Approx cost |
 | --- | --- | --- | --- |
-| [05](part2_hpc/05_hpc_uan.md) | Run Claude natively on your system + a first job | 35–50 min | ~1 node-min |
+| [05](part2_hpc/05_hpc_uan.md) | Run the agent natively on your system + a first job | 35–50 min | ~1 node-min |
 
 ## Part 3 — Orchestrating Job Submission via IRI (all three facilities)
 
-`claude` stays **on your laptop**; reaching Polaris, Perlmutter, and Frontier
+The agent stays **on your laptop**; reaching Polaris, Perlmutter, and Frontier
 happens entirely through the bundled `alcf-iri`, `nersc-iri`, and `olcf-iri` MCP
 servers' named tools. See [part3_iri/README.md](part3_iri/README.md) for the full
 intro. **Do [PREREQUISITES.md](PREREQUISITES.md) first** — an account and
@@ -112,7 +120,7 @@ Every lab is self-contained with: **objectives · time · prerequisites · conce
 ```text
 Part 1 — laptop only                Part 2 — native, on your HPC system
 ────────────────────                ────────────────────────────────────
-00 set up Claude Code + MAG          05 run Claude natively + a first job
+00 set up your agent + MAG           05 run the agent natively + a first job
 01 simulation ─┐
 02 training ───┤ the spine
 03 inference ──┘                     Part 3 — laptop + IRI/MCP (3 facilities)
@@ -134,8 +142,9 @@ Part 1 — laptop only                Part 2 — native, on your HPC system
             ▼
    ┌─────────────────┐     decides which tool,
    │   the agent     │────▶ with which arguments
-   │  (Claude, via   │
-   │   MAG gateway)  │◀──── reads the result, decides the next step
+   │  (Claude or     │
+   │  opencode, via  │
+   │   the MAG)      │◀──── reads the result, decides the next step
    └─────────────────┘
             │ tool call
             ▼
@@ -162,8 +171,8 @@ or long-lived API keys checked into this repo.
 
 **1. The MAG token — lets the agent talk to the *model*.** Every part needs this.
 It's a **Personal Access Token** you mint once from the AmSC Model Access Gateway
-and point Claude Code at (Lab 00). It authenticates *you → the LLM*. Part 1 needs
-nothing else.
+and point your agent at (Claude Code or opencode — Lab 00). It authenticates
+*you → the LLM*. Part 1 needs nothing else.
 
 **2. Facility tokens — let the agent's tools reach the *HPC systems*.** Only
 Part 3 needs these. Each facility authenticates as **you** via its own flow:

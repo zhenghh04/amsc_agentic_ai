@@ -310,6 +310,66 @@ other lab is identical.
 
 ---
 
+## Appendix C — the opencode path (agent-agnostic, optional)
+
+Nothing in this track is Claude-Code-specific. The labs drive the agent's **tools**
+(in Part 3, the bundled **MCP servers**) and follow the conventions in `AGENTS.md`
+— both agent-agnostic. If you can't or don't want to run Claude Code, you can run
+**every lab identically** with [opencode](https://opencode.ai), an open-source
+terminal coding agent, still billed to your AmSC project through MAG. Anywhere a
+lab shows the `claude` command, run `opencode` instead.
+
+The repo ships an `opencode.jsonc` at its root that wires opencode to the **same
+five MCP servers** Claude Code gets from `.mcp.json`, points it at **MAG** as its
+model provider, and loads the **same `AGENTS.md`** instructions. One important
+detail is baked in: MAG is an **OpenAI-compatible** gateway, so opencode talks to
+it over the OpenAI wire at `…/v1` — the Anthropic wire returns a redirect opencode
+won't follow, which looks like a silent "no response".
+
+### Set it up
+
+```bash
+# 1. Install opencode (per-user, no admin). macOS/Linux/WSL:
+curl -fsSL https://opencode.ai/install | bash
+#    (or: npm install -g opencode-ai  — needs the Node from Step 1)
+
+# 2. Put your MAG PAT in AMSC_I2_API_KEY (the same token from Step 2) WITHOUT
+#    leaving it in your shell history — read it in, don't type it on the command line.
+#    (printf + `read -rs` works in both bash and zsh; bash's `read -p` prompt flag
+#     does NOT — in zsh, macOS's default shell, -p means "read from a coprocess".)
+printf "MAG PAT: "
+read -rs AMSC_I2_API_KEY; echo
+export AMSC_I2_API_KEY
+
+# 3. Launch opencode from the repo root (where opencode.jsonc lives):
+cd /path/to/amsc_agentic_ai
+opencode
+```
+
+opencode picks up `opencode.jsonc` automatically. At the prompt, type the same
+Step 4 verification message; the reply comes back through MAG — that's the Part 1
+round-trip, exactly as in Step 4 for Claude Code. Models other than the default
+(`mag/claude-sonnet-4-6`) are switchable from opencode's model picker — the
+`provider.mag.models` block in `opencode.jsonc` lists the ones MAG serves.
+
+> **The MCP servers aren't usable yet — that's expected in Part 1.** `opencode.jsonc`
+> already wires all five servers, but they need the **Part 3** Python dependencies
+> (`requirements.txt`, installed in [PREREQUISITES.md](../PREREQUISITES.md)) before
+> they can start. opencode still *tries* to launch them, so until those deps are in
+> place they show up as **failed/unavailable** under `/mcp` (if at all) and their
+> tools won't work — that's fine; there's nothing to do here in Part 1. Once the
+> Part 3 deps are installed they start cleanly and `/mcp` lists them. Same for
+> Claude Code.
+
+> **Prefer ALCF Inference as the model source?** opencode takes any
+> OpenAI-compatible provider. ALCF's Inference Service exposes one per cluster at
+> `https://inference-api.alcf.anl.gov/resource_server/<cluster>/api/v1` — add it
+> as a second `provider` entry with your ALCF access token, and the same labs run
+> against open-weight models hosted at ALCF. MAG and ALCF Inference are two token
+> sources for the identical workflow.
+
+---
+
 **Next:** [Lab 01 — The 101: drive a small local simulation →](01_local_simulation.md)
 
 ---
