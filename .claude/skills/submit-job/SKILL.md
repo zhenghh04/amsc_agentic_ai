@@ -71,9 +71,17 @@ machine. When a facility fact is unclear (queue limits, modules, the proxy), cal
 ## Workshop guardrails
 
 Keep test runs cheap: **debug queue, 1 node, a few minutes.** Each lab notes an
-approximate cost. If a job is stuck or misbehaving, cancel it (`cancel_job`, or a
-Globus Compute endpoint has no cancel — just stop polling) rather than letting it
-churn the allocation.
+approximate cost.
+
+- **IRI batch jobs can be cancelled.** If one is stuck or misbehaving, call
+  `cancel_job` — that really does stop it and stop the billing.
+- **Globus Compute tasks cannot.** The SDK has no cancellation API: once a task
+  is registered it runs to completion. Giving up on `get_result` only stops you
+  *watching* it — the task stays queued or running and stays billed, now
+  unobserved. So the limit has to be set **before** submission: put a short
+  `walltime` in `user_endpoint_config` (e.g. `"walltime": "00:05:00"`) and keep
+  the node count at 1. That bound is the only thing that will actually stop a
+  runaway task.
 
 ## Common causes of failure
 

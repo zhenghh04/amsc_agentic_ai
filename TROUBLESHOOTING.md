@@ -214,6 +214,13 @@ skip ahead and come back — nothing here is a dead end.
   A task that stays queued usually means the `account`/`queue` in
   `user_endpoint_config` is wrong; verify with `get_project_allocations` (Lab 07).
 
+**A task is running away and you want to stop it**
+: You can't. Unlike an IRI batch job (`cancel_job`), a Globus Compute task has no
+  cancel — the SDK runs it to completion once registered. Closing the chat or
+  giving up on `get_result` only stops you *watching* it; it keeps running and
+  keeps billing. Set the bound up front instead: a short `"walltime"` in
+  `user_endpoint_config` and 1 node.
+
 **Auth / 401 on a compute call**
 : The compute token expired. Re-run `python scripts/auth/globus_auth.py
   ensure_valid` (it refreshes and re-syncs `.env`); the server re-reads it on the
