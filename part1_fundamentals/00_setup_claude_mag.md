@@ -312,11 +312,12 @@ other lab is identical.
 
 ## Appendix C — the opencode path (agent-agnostic, optional)
 
-Nothing in this track is Claude-Code-specific. The labs drive **MCP tools** and
-follow the conventions in `AGENTS.md` — both of which are agent-agnostic. If you
-can't or don't want to run Claude Code, you can run **every lab identically**
-with [opencode](https://opencode.ai), an open-source terminal coding agent, still
-billed to your AmSC project through MAG.
+Nothing in this track is Claude-Code-specific. The labs drive the agent's **tools**
+(in Part 3, the bundled **MCP servers**) and follow the conventions in `AGENTS.md`
+— both agent-agnostic. If you can't or don't want to run Claude Code, you can run
+**every lab identically** with [opencode](https://opencode.ai), an open-source
+terminal coding agent, still billed to your AmSC project through MAG. Anywhere a
+lab shows the `claude` command, run `opencode` instead.
 
 The repo ships an `opencode.jsonc` at its root that wires opencode to the **same
 five MCP servers** Claude Code gets from `.mcp.json`, points it at **MAG** as its

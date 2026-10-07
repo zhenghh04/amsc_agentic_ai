@@ -15,9 +15,11 @@ Model Access Gateway (MAG)** (and optionally run inside **VS Code**) — and use
 to do real scientific-computing work, first on your laptop and then on real DOE
 HPC systems: **Polaris** (ALCF), **Perlmutter** (NERSC), and **Frontier** (OLCF).
 
-The track is **agent-agnostic**: every lab drives MCP tools and the shared
-`AGENTS.md` conventions, so it runs identically under Claude Code (`.mcp.json`) or
-opencode (`opencode.jsonc`) — both billed to your AmSC project through MAG.
+The track is **agent-agnostic**: every lab drives the agent's **tools** and the
+shared `AGENTS.md` conventions — and in Part 3 those tools are the bundled **MCP
+servers** — so it runs identically under Claude Code (`.mcp.json`) or opencode
+(`opencode.jsonc`), both billed to your AmSC project through MAG. Where a lab shows
+the `claude` command, opencode users run `opencode` instead.
 
 You describe a task in plain English. The agent reasons about it, writes code,
 runs tools, submits jobs, reads the results, and iterates.

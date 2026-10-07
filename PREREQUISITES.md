@@ -206,7 +206,7 @@ first call it — harmless; set up only the facilities you use.
 
 ## 4. Verify the connection (read-only, free)
 
-Inside `claude`, from `amsc_agentic_ai/`:
+Inside `claude` (or `opencode`), from `amsc_agentic_ai/`:
 
 ```text
 /mcp
