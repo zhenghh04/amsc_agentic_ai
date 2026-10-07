@@ -17,6 +17,18 @@
       "args": [
         "mcp/hpc/olcf_iri_server.py"
       ]
+    },
+    "globus-compute": {
+      "command": "python",
+      "args": [
+        "mcp/compute/globus_compute_server.py"
+      ]
+    },
+    "knowledge": {
+      "command": "python",
+      "args": [
+        "mcp/knowledge/docs_server.py"
+      ]
     }
   }
 }

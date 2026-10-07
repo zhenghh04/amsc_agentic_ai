@@ -104,6 +104,7 @@ allocation on at least one facility, and the bundled MCP servers authenticated.
 | --- | --- | --- | --- |
 | [07](part3_iri/07_mcp_setup_and_explore.md) | Connect to ALCF/NERSC/OLCF & explore (read-only) | 20–30 min | free |
 | [08](part3_iri/08_iri_job_submission.md) | IRI job submission and monitoring | 30–45 min | ~1 node-min |
+| [09](part3_iri/09_remote_functions.md) | Remote functions with Globus Compute | 30–45 min | ~1 node-min |
 
 Every lab is self-contained with: **objectives · time · prerequisites · concepts
 · hands-on steps · "what just happened" · a checkpoint · exercises**.
@@ -118,7 +119,7 @@ Part 1 — laptop only                Part 2 — native, on your HPC system
                                      ─────────────────────────────────────
                     PREREQUISITES.md  07 connect & explore (MCP setup)
                     (Part 3 only:     08 IRI job submission + monitor
-                     account,
+                     account,         09 remote functions (Globus Compute)
                      allocation,
                      IRI MCP servers)
 ```
@@ -173,6 +174,7 @@ Part 3 needs these. Each facility authenticates as **you** via its own flow:
 | NERSC (Perlmutter) | Browser **Globus** login, forced through `nersc.gov` identity | `NERSC_IRI_TOKEN` |
 | OLCF (Frontier) | Manually minted **myOLCF API token** (no browser flow) | `OLCF_IRI_TOKEN` |
 | Any facility (data movement) | **Globus Transfer** token (`scripts/auth/globus_auth.py`) | `GLOBUS_TRANSFER_TOKEN` |
+| Any facility (remote functions, Lab 09) | **Globus Compute** token — same login as Transfer (`scripts/auth/globus_auth.py`) | `GLOBUS_COMPUTE_TOKEN` |
 
 ### How it works
 
