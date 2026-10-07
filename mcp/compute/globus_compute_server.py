@@ -149,6 +149,12 @@ def _globus_compute_deps():
     return Client, AccessTokenAuthorizer
 
 
+def _build_client(token: str):
+    """Construct a Client for one token. No network I/O, no global state."""
+    Client, AccessTokenAuthorizer = _globus_compute_deps()
+    return Client(authorizer=AccessTokenAuthorizer(token))
+
+
 def _get_client():
     """Build (or reuse) a Globus Compute Client from the on-disk token.
 
@@ -173,8 +179,7 @@ def _get_client():
         if _client_token is not None and token != _client_token:
             _registered.clear()
             _shell_func_id = None
-        Client, AccessTokenAuthorizer = _globus_compute_deps()
-        _client = Client(authorizer=AccessTokenAuthorizer(token))
+        _client = _build_client(token)
         _client_token = token
     return _client
 
@@ -272,22 +277,30 @@ async def authenticate(token: str = "") -> str:
             f"Error: no token provided and {_TOKEN_VAR} not found in {_ENV_FILE}. "
             "Run `python scripts/auth/globus_auth.py ensure_valid` to mint one, then retry."
         )
+    # Constructing a client does no network I/O, so it cannot tell a good token
+    # from a bad one. Probe with an account-scoped call: listing your own
+    # endpoints depends only on the token, unlike probing a specific MEP, which
+    # would also fail when that endpoint is merely down or draining.
     if explicit:
+        # Validate the candidate on a throwaway client FIRST. Writing it to disk
+        # before the probe would let one mistyped token destroy a working
+        # credential and still report failure.
+        try:
+            probe = _build_client(token)
+            await asyncio.to_thread(probe.get_endpoints)
+        except Exception as exc:
+            return _handle_error(exc)
         # _get_client resolves the token through trinity_env.read_value, which
         # reads the file and deliberately bypasses os.environ. Persist it the way
         # the IRI servers do, or a token handed to this call would be ignored in
-        # favour of whatever is already on disk.
+        # favour of whatever is already on disk. The next _get_client() sees the
+        # new value and rebuilds (and drops the registration caches with it).
         _update_env(_TOKEN_VAR, token)
-    os.environ[_TOKEN_VAR] = token
+        os.environ[_TOKEN_VAR] = token
+        return f"Globus Compute authenticated. Token saved to {_ENV_FILE}."
     try:
         client = _get_client()
-        # Constructing the client does no network I/O, so it cannot tell a good
-        # token from a bad one. Make an account-scoped call instead: listing your
-        # own endpoints depends only on the token, unlike probing a specific MEP,
-        # which would also fail when that endpoint is merely down or draining.
         await asyncio.to_thread(client.get_endpoints)
-        if explicit:
-            return f"Globus Compute authenticated. Token saved to {_ENV_FILE}."
         return f"Globus Compute authenticated (token from {_ENV_FILE})."
     except Exception as exc:
         return _handle_error(exc)
@@ -430,7 +443,6 @@ async def run_function(
     except json.JSONDecodeError as exc:
         return f"Error parsing JSON argument: {exc}"
 
-    func_uuid = _registered.get(function_id, function_id)
     msg = _mep_config_ready(ep, cfg)
     if msg:
         return msg
@@ -438,6 +450,11 @@ async def run_function(
 
     try:
         client = _get_client()
+        # Resolve the friendly name only AFTER _get_client(), which drops
+        # _registered when the token changed. Reading it first would copy out a
+        # UUID registered by the previous identity and submit it under the new
+        # one — exactly what that invalidation exists to prevent.
+        func_uuid = _registered.get(function_id, function_id)
         task_id = await asyncio.to_thread(
             _submit, client, ep, func_uuid, tuple(args), kwargs, cfg
         )
