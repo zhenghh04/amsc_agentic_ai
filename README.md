@@ -9,11 +9,15 @@
 > stripped down to the smallest self-contained form you can run and learn from.
 
 A hands-on tutorial for getting started with **agentic AI** as an AmSC
-(American Science Cloud) user. You'll set up an AI coding agent — **Claude Code**,
-pointed at the **AmSC Model Access Gateway (MAG)** (and optionally run inside
-**VS Code**) — and use it to do real scientific-computing work, first on your
-laptop and then on real DOE HPC systems: **Polaris** (ALCF), **Perlmutter**
-(NERSC), and **Frontier** (OLCF).
+(American Science Cloud) user. You'll set up an AI coding agent — **Claude Code**
+(or the open-source **opencode**; see Lab 00 Appendix C), pointed at the **AmSC
+Model Access Gateway (MAG)** (and optionally run inside **VS Code**) — and use it
+to do real scientific-computing work, first on your laptop and then on real DOE
+HPC systems: **Polaris** (ALCF), **Perlmutter** (NERSC), and **Frontier** (OLCF).
+
+The track is **agent-agnostic**: every lab drives MCP tools and the shared
+`AGENTS.md` conventions, so it runs identically under Claude Code (`.mcp.json`) or
+opencode (`opencode.jsonc`) — both billed to your AmSC project through MAG.
 
 You describe a task in plain English. The agent reasons about it, writes code,
 runs tools, submits jobs, reads the results, and iterates.
@@ -162,8 +166,8 @@ or long-lived API keys checked into this repo.
 
 **1. The MAG token — lets the agent talk to the *model*.** Every part needs this.
 It's a **Personal Access Token** you mint once from the AmSC Model Access Gateway
-and point Claude Code at (Lab 00). It authenticates *you → the LLM*. Part 1 needs
-nothing else.
+and point your agent at (Claude Code or opencode — Lab 00). It authenticates
+*you → the LLM*. Part 1 needs nothing else.
 
 **2. Facility tokens — let the agent's tools reach the *HPC systems*.** Only
 Part 3 needs these. Each facility authenticates as **you** via its own flow:

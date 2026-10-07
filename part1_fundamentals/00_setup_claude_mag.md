@@ -310,6 +310,51 @@ other lab is identical.
 
 ---
 
+## Appendix C — the opencode path (agent-agnostic, optional)
+
+Nothing in this track is Claude-Code-specific. The labs drive **MCP tools** and
+follow the conventions in `AGENTS.md` — both of which are agent-agnostic. If you
+can't or don't want to run Claude Code, you can run **every lab identically**
+with [opencode](https://opencode.ai), an open-source terminal coding agent, still
+billed to your AmSC project through MAG.
+
+The repo ships an `opencode.jsonc` at its root that wires opencode to the **same
+five MCP servers** Claude Code gets from `.mcp.json`, points it at **MAG** as its
+model provider, and loads the **same `AGENTS.md`** instructions. One important
+detail is baked in: MAG is an **OpenAI-compatible** gateway, so opencode talks to
+it over the OpenAI wire at `…/v1` — the Anthropic wire returns a redirect opencode
+won't follow, which looks like a silent "no response".
+
+### Set it up
+
+```bash
+# 1. Install opencode (per-user, no admin). macOS/Linux/WSL:
+curl -fsSL https://opencode.ai/install | bash
+#    (or: npm install -g opencode-ai  — needs the Node from Step 1)
+
+# 2. Export your MAG PAT as AMSC_I2_API_KEY (the same token from Step 2).
+export AMSC_I2_API_KEY=<paste-your-MAG-PAT-here>
+
+# 3. Launch opencode from the repo root (where opencode.jsonc lives):
+cd /path/to/amsc_agentic_ai
+opencode
+```
+
+opencode picks up `opencode.jsonc` automatically. At the prompt, type the same
+Step 4 verification message; the reply comes back through MAG, and
+`/mcp` lists the five tutorial servers. Models other than the default
+(`mag/claude-sonnet-4-6`) are switchable from opencode's model picker — the
+`provider.mag.models` block in `opencode.jsonc` lists the ones MAG serves.
+
+> **Prefer ALCF Inference as the model source?** opencode takes any
+> OpenAI-compatible provider. ALCF's Inference Service exposes one per cluster at
+> `https://inference-api.alcf.anl.gov/resource_server/<cluster>/api/v1` — add it
+> as a second `provider` entry with your ALCF access token, and the same labs run
+> against open-weight models hosted at ALCF. MAG and ALCF Inference are two token
+> sources for the identical workflow.
+
+---
+
 **Next:** [Lab 01 — The 101: drive a small local simulation →](01_local_simulation.md)
 
 ---

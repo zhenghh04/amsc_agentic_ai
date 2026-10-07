@@ -192,6 +192,12 @@ and `knowledge`) are optional add-ons you can ignore until you reach that lab.
 A server whose token you haven't set simply reports "not authenticated" when you
 first call it — harmless; set up only the facilities you use.
 
+> **Using opencode instead of Claude Code?** The repo also ships
+> [`opencode.jsonc`](opencode.jsonc), which wires the *same five servers* (plus a
+> MAG model provider and this folder's `AGENTS.md`) into opencode. Launch
+> `opencode` from `amsc_agentic_ai/` and the identical tools appear under `/mcp`.
+> See [Lab 00 Appendix C](part1_fundamentals/00_setup_claude_mag.md#appendix-c--the-opencode-path-agent-agnostic-optional).
+
 > **Prefer an officially supported integration if your facility later ships
 > one.** Ask the facility's user support whether a facility-blessed agent/MCP
 > integration exists for your systems. Swapping it in is the same mechanism —
