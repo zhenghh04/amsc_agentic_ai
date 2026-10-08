@@ -30,7 +30,7 @@ into the request below.
 - Interactive Swagger: <https://api.alcf.anl.gov/>
 - OpenAPI spec: <https://api.alcf.anl.gov/openapi.json>
 
-## 1. A read-only call needs no token
+## 1. Reading public status needs no token
 
 System status is public. This is the HTTP behind "is Polaris up?":
 
@@ -121,9 +121,9 @@ This tutorial bundles its **own** helpers instead
 `nersc_iri_token.py`, `globus_auth.py`). They are a deliberate complement, not a
 competitor — the trade-off is narrow and worth understanding:
 
-| | bundled `scripts/auth/*.py` | `alcf-tokens` |
+| | the bundled tutorial flow | `alcf-tokens` |
 |---|---|---|
-| Facilities | ALCF **+ NERSC + OLCF + Globus** | ALCF only |
+| Facilities | **ALCF + NERSC + Globus** via `scripts/auth/*.py` (+ OLCF via a manual portal token) | ALCF only |
 | Where the token lands | writes it into **`.env`**, which every bundled MCP server re-reads per call | its own cache (`~/`), read via CLI/SDK |
 | Extra dependency | none (vendored in this repo) | `pip install alcf-tokens` |
 | Support | this tutorial | **officially supported by ALCF** |
@@ -135,8 +135,12 @@ authenticate by re-reading `.env`, so a token has to land there. Guidance:
   and already wired to the `.env` the MCP servers read.
 - **Reach for `alcf-tokens`** when you're ALCF-only, want the officially-supported
   tool, or are following ALCF's own SES / Inference demos (which assume it).
-- **They interoperate.** `alcf-tokens` manages the token; you can still drop it into
-  `.env` for the MCP servers: `ALCF_IRI_TOKEN=$(alcf-tokens get-token iri)`.
+- **They interoperate.** `alcf-tokens` manages the token; the MCP servers read it from
+  `.env` (not your shell), so it has to land *there* — set the `ALCF_IRI_TOKEN=` line in
+  `.env` to the CLI's output, e.g. append it with
+  `echo "ALCF_IRI_TOKEN=$(alcf-tokens get-token iri)" >> .env` (replace an existing
+  `ALCF_IRI_TOKEN=` line rather than leaving a duplicate). A plain shell
+  `ALCF_IRI_TOKEN=…` assignment won't do — the servers never see your shell.
 
 ---
 

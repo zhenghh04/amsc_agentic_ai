@@ -99,7 +99,8 @@ messages = [
     {"role": "user", "content": question},
 ]
 
-while True:
+MAX_TURNS = 8                       # paid endpoint: never loop on tool calls forever
+for _ in range(MAX_TURNS):
     msg = client.chat.completions.create(
         model="claude-sonnet-4-6", messages=messages, tools=TOOLS,
     ).choices[0].message
@@ -113,6 +114,8 @@ while True:
         result = TOOL_FUNCTIONS[call.function.name](**json.loads(call.function.arguments))
         print(f"[tool] {call.function.name}({call.function.arguments}) -> {result}")
         messages.append({"role": "tool", "tool_call_id": call.id, "content": result})
+else:                               # ran the cap without a plain-text answer
+    raise RuntimeError(f"no final answer after {MAX_TURNS} tool-calling turns")
 ```
 
 That's the entire pattern. MAG's OpenAI-compatible endpoint translates the
