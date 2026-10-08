@@ -84,7 +84,7 @@ resp = requests.post(
         "stderr_path": "/home/<your-alcf-username>/log_example.err",
         "resources": {"node_count": 1},
         "attributes": {
-            "duration": 300,                 # walltime, seconds
+            "duration": 60,                  # walltime cap, seconds (keep it ~1 node-min)
             "queue_name": "debug",
             "account": "<your-allocation>",  # charged real node-hours
             "custom_attributes": {"filesystems": "home:eagle"},
