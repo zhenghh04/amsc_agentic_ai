@@ -57,10 +57,12 @@ read-only `status/resources` call above is always the source of truth.)*
 ## 2. Submitting a job needs your token
 
 Everything that acts as *you* — submitting, cancelling, reading your files —
-carries a bearer token in the header. **This is the same token the `alcf-iri` MCP
-server uses**; the server just re-reads it from `.env` on every call (see
-[PREREQUISITES.md](../PREREQUISITES.md), "How it works"). In a standalone script
-you'd read it from the environment:
+carries a bearer token in the header. **It's the same token the `alcf-iri` MCP
+server uses** — but note *how* each gets it. The server re-reads it from the `.env`
+file on every call (see [PREREQUISITES.md](../PREREQUISITES.md), "How it works"); a
+standalone script like this one reads your **process environment**, so put the token
+there first — `export ALCF_IRI_TOKEN=$(alcf-tokens get-token iri)` (or export the value
+your `.env` holds). Then:
 
 ```python
 import os, requests
