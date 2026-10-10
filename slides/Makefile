@@ -22,19 +22,13 @@ HANDSON := amsc_agentic_ai_handson
 OVERVIEW := amsc_agentic_ai
 XELATEX := xelatex -interaction=nonstopmode -halt-on-error
 
-# Rebuild when the logo changes too. Via $(wildcard ...) rather than a literal
-# prerequisite: \decklogo guards the logo with \IfFileExists and falls back to a
-# text lockup, so the deck must still build when the asset is absent. A literal
-# prerequisite would turn that graceful fallback into a "No rule to make target".
-LOGO := $(wildcard logos/*.pdf)
-
 .PHONY: all handson overview view clean
 
 all: handson
 
 handson: $(HANDSON).pdf
 
-$(HANDSON).pdf: $(HANDSON).tex $(LOGO)
+$(HANDSON).pdf: $(HANDSON).tex
 	$(XELATEX) $(HANDSON).tex
 	$(XELATEX) $(HANDSON).tex
 

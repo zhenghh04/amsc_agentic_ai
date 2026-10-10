@@ -491,7 +491,7 @@ reply = mag.chat.completions.create(
       \begin{lstlisting}[style=pysnip]
 BASE = "https://api.alcf.anl.gov/api/v1"
 h = {"Authorization":
-     f"Bearer {os.environ['ALCF_IRI_TOKEN']}"}
+     f"Bearer {os.environ['IRI_TOKEN_ALCF']}"}
 job = httpx.post(f"{BASE}/jobs/polaris",
     headers=h, json=job_spec).json()
 state = httpx.get(
@@ -627,7 +627,7 @@ state = httpx.get(
       \begin{lstlisting}[style=treesnip]
 mcp/
 |-- context_utils.py
-|-- trinity_env.py
+|-- auth_env.py
 `-- hpc/
     |-- alcf_server.py
     |-- alcf_iri_client.py
