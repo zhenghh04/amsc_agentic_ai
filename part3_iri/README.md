@@ -23,13 +23,10 @@ is installed on the shared login nodes.
 You don't need all three. Set up the one(s) you have; the servers you didn't
 authenticate simply report "not authenticated" and are harmless.
 
-### Two more servers for Lab 09
-
-Lab 09 (remote functions) adds two servers on top of the IRI three:
+### One more server, no token required
 
 | Server | Serves | Auth (see PREREQUISITES) |
 | --- | --- | --- |
-| `globus-compute` | Runs a Python function / shell command on a facility MEP (Polaris, Crux) | Globus browser login (`globus_auth.py` — same one as Transfer) |
 | `knowledge` | `retrieve_alcf_docs` — searches the public ALCF/NERSC/OLCF docs | **none** (public endpoint, token-free) |
 
 ## The skill
@@ -37,13 +34,11 @@ Lab 09 (remote functions) adds two servers on top of the IRI three:
 Tools give the agent *reach*; a **skill** gives it *judgment* — the site
 conventions a careful colleague would apply without being asked. This repo ships
 one, [`.claude/skills/submit-job/SKILL.md`](../.claude/skills/submit-job/SKILL.md):
-it tells the agent how to choose between an IRI batch job and a Globus Compute
-function, which queue and allocation to charge, and what to check before
-submitting. Claude Code discovers it automatically when you launch from the repo
-root — you never invoke it by hand. Read it once; it is the most editable part of
-this tutorial, and adapting it to your own project's conventions is the point.
-
-Both are optional and only used in Lab 09; skip them if you're stopping at Lab 08.
+it tells the agent how to stage inputs for an IRI batch job, which queue and
+allocation to charge, and what to check before submitting. Claude Code discovers
+it automatically when you launch from the repo root — you never invoke it by
+hand. Read it once; it is the most editable part of this tutorial, and adapting
+it to your own project's conventions is the point.
 
 ---
 
@@ -53,7 +48,6 @@ Both are optional and only used in Lab 09; skip them if you're stopping at Lab 0
 | --- | --- | --- | --- |
 | [07](07_mcp_setup_and_explore.md) | Connect to ALCF/NERSC/OLCF & explore (read-only) | 20–30 min | free (no jobs) |
 | [08](08_iri_job_submission.md) | IRI job submission and monitoring | 30–45 min | ~1 node-minute |
-| [09](09_remote_functions.md) | Remote functions with Globus Compute | 30–45 min | ~1 node-minute |
 
 ## The one loop to learn
 

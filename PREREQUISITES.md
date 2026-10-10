@@ -33,10 +33,9 @@ python3 -m venv .venv && source .venv/bin/activate   # recommended
 pip install -r requirements.txt
 ```
 
-`requirements.txt` pulls in three for the IRI spine — `mcp` (the MCP server
+`requirements.txt` pulls in the three the IRI spine needs — `mcp` (the MCP server
 framework), `httpx` (the async HTTP client the servers use), and `globus-sdk` (the
-browser login flow in the auth scripts) — plus `globus-compute-sdk`, which only the
-optional Lab 09 compute server needs. Skip this and the auth scripts fail with
+browser login flow in the auth scripts). Skip this and the auth scripts fail with
 `ModuleNotFoundError: No module named 'globus_sdk'`, and the servers never appear
 in `/mcp`.
 
@@ -72,9 +71,8 @@ python scripts/auth/alcf_iri_token.py authenticate
 # --- NERSC / Perlmutter — browser Globus login (must log in via nersc.gov)
 python scripts/auth/nersc_iri_token.py authenticate
 
-# --- Globus Transfer + Compute token — move data to/from any facility's
-#     filesystems, and (Lab 09) run functions on a facility MEP. One login
-#     mints both GLOBUS_TRANSFER_TOKEN and GLOBUS_COMPUTE_TOKEN into .env.
+# --- Globus Transfer token — move data to/from any facility's filesystems.
+#     One login mints GLOBUS_TRANSFER_TOKEN into .env.
 python scripts/auth/globus_auth.py authenticate
 ```
 
@@ -90,9 +88,8 @@ automatically thereafter. Check the Globus status any time with
 > are the recommended path here (cross-facility, zero extra deps, and they write the
 > `.env` the MCP servers read), but if you already use `alcf-tokens` you can write its
 > token into `.env` for the ALCF server — the servers read `.env`, not your shell:
-> `echo "ALCF_IRI_TOKEN=$(alcf-tokens get-token iri)" >> .env` (replace an existing
-> `ALCF_IRI_TOKEN=` line rather than duplicating it). The trade-offs are laid out in
-> [Bonus A](going_further/A_raw_facility_rest.md#a-note-on-tokens--alcf-tokens-vs-the-bundled-helpers).
+> `echo "IRI_TOKEN_ALCF=$(alcf-tokens get-token iri)" >> .env` (replace an existing
+> `IRI_TOKEN_ALCF=` line rather than duplicating it).
 
 ### OLCF / Frontier — a manually issued API token
 
@@ -104,7 +101,7 @@ myOLCF portal and paste it into `.env` yourself:
    facility/status but returns HTTP 401 on any job submission).
 3. Add it to `amsc_agentic_ai/.env`:
    ```bash
-   echo "OLCF_IRI_TOKEN=<paste-the-token>" >> .env
+   echo "IRI_TOKEN_OLCF=<paste-the-token>" >> .env
    ```
 
 The `olcf-iri` server re-reads `.env` on every call, so a refreshed token is
@@ -165,18 +162,23 @@ files, transfer data.
 
 | Server | Talks to | Serves | Token env var |
 | --- | --- | --- | --- |
-| [`mcp/hpc/alcf_server.py`](mcp/hpc/alcf_server.py) | `api.alcf.anl.gov` | **Polaris** | `ALCF_IRI_TOKEN` |
-| [`mcp/hpc/nersc_server.py`](mcp/hpc/nersc_server.py) | `api.iri.nersc.gov` | **Perlmutter** | `NERSC_IRI_TOKEN` |
-| [`mcp/hpc/olcf_iri_server.py`](mcp/hpc/olcf_iri_server.py) | `amsc-moderate.s3m.olcf.ornl.gov` | **Frontier** | `OLCF_IRI_TOKEN` |
+| [`mcp/hpc/alcf_server.py`](mcp/hpc/alcf_server.py) | `api.alcf.anl.gov` | **Polaris** | `IRI_TOKEN_ALCF` |
+| [`mcp/hpc/nersc_server.py`](mcp/hpc/nersc_server.py) | `api.iri.nersc.gov` | **Perlmutter** | `IRI_TOKEN_NERSC` |
+| [`mcp/hpc/olcf_iri_server.py`](mcp/hpc/olcf_iri_server.py) | `amsc-moderate.s3m.olcf.ornl.gov` | **Frontier** | `IRI_TOKEN_OLCF` |
 
-Lab 09 (remote functions) adds two more, both optional:
+These are the same `IRI_TOKEN_<FACILITY>` names the DOE IRI hands-on session
+uses, so a token you already have from that session needs no renaming. The
+servers also still read the older `<FACILITY>_IRI_TOKEN` spelling, and the login
+helpers write both names, so an `.env` from an earlier run of this tutorial
+keeps working.
+
+A fourth server needs no token at all:
 
 | Server | Talks to | Serves | Token env var |
 | --- | --- | --- | --- |
-| [`mcp/compute/globus_compute_server.py`](mcp/compute/globus_compute_server.py) | `compute.api.globus.org` | Functions on a facility MEP (Polaris, Crux) | `GLOBUS_COMPUTE_TOKEN` |
 | [`mcp/knowledge/docs_server.py`](mcp/knowledge/docs_server.py) | `ask.alcf.anl.gov/mcp` | `retrieve_alcf_docs` over public DOE docs | **none** |
 
-All five are wired up in [`.mcp.json`](.mcp.json) in this folder:
+All four are wired up in [`.mcp.json`](.mcp.json) in this folder:
 
 ```json
 {
@@ -184,7 +186,6 @@ All five are wired up in [`.mcp.json`](.mcp.json) in this folder:
     "alcf-iri": { "command": "python", "args": ["mcp/hpc/alcf_server.py"] },
     "nersc-iri": { "command": "python", "args": ["mcp/hpc/nersc_server.py"] },
     "olcf-iri": { "command": "python", "args": ["mcp/hpc/olcf_iri_server.py"] },
-    "globus-compute": { "command": "python", "args": ["mcp/compute/globus_compute_server.py"] },
     "knowledge": { "command": "python", "args": ["mcp/knowledge/docs_server.py"] }
   }
 }
@@ -196,13 +197,12 @@ token is picked up without a restart. As long as your agent is launched with
 `amsc_agentic_ai/` as its working folder (`cd amsc_agentic_ai && claude`,
 `cd amsc_agentic_ai && opencode`, or `code amsc_agentic_ai` for the VS Code
 extension), all of them are picked up automatically — nothing to register by hand. Three are the IRI spine
-(`alcf-iri`, `nersc-iri`, `olcf-iri`); the two Lab 09 servers (`globus-compute`
-and `knowledge`) are optional add-ons you can ignore until you reach that lab.
+(`alcf-iri`, `nersc-iri`, `olcf-iri`); `knowledge` is the token-free docs server.
 A server whose token you haven't set simply reports "not authenticated" when you
 first call it — harmless; set up only the facilities you use.
 
 > **Using opencode instead of Claude Code?** The repo also ships
-> [`opencode.jsonc`](opencode.jsonc), which wires the *same five servers* (plus a
+> [`opencode.jsonc`](opencode.jsonc), which wires the *same four servers* (plus a
 > MAG model provider and this folder's `AGENTS.md`) into opencode. Launch
 > `opencode` from `amsc_agentic_ai/` and the identical tools appear under `/mcp`.
 > See [Lab 00 Appendix C](part1_fundamentals/00_setup_claude_mag.md#appendix-c--the-opencode-path-agent-agnostic-optional).
@@ -223,8 +223,7 @@ Inside `claude` (or `opencode`), from `amsc_agentic_ai/`:
 
 You should see **alcf-iri**, **nersc-iri**, and **olcf-iri**, each with tools
 including `list_resources`, `get_system_status`, `list_projects`, `submit_job`,
-`get_job_status` (plus **globus-compute** and **knowledge** if you set up Lab 09).
-Then:
+`get_job_status` — plus **knowledge**, which needs no token. Then:
 
 > What compute resources are up right now at ALCF, NERSC, and OLCF, and what
 > allocations do I have on each?

@@ -34,9 +34,13 @@ python scripts/auth/alcf_iri_token.py authenticate
 ```
 
 A browser window opens at `auth.globus.org`. Log in with your ALCF Globus
-identity, grant the requested scopes, and the script writes `ALCF_IRI_TOKEN` to
+identity, grant the requested scopes, and the script writes `IRI_TOKEN_ALCF` to
 `amsc_agentic_ai/.env`. Over SSH (no browser)? It prints a URL — open it on
 any machine, paste back the code.
+
+> Already have `IRI_TOKEN_ALCF` from the DOE IRI session? Put that value in
+> `.env` and skip this step — it's the same token under the same name. The
+> servers also still accept the older `ALCF_IRI_TOKEN` spelling.
 
 ### NERSC / Perlmutter — IRI token (Globus, must use nersc.gov identity)
 
@@ -45,7 +49,7 @@ python scripts/auth/nersc_iri_token.py authenticate
 ```
 
 Same browser flow, but Globus will prompt you to link a `nersc.gov` identity if
-you haven't already. Writes `NERSC_IRI_TOKEN` to `.env`.
+you haven't already. Writes `IRI_TOKEN_NERSC` to `.env`.
 
 ### OLCF / Frontier — manually issued API token
 
@@ -56,7 +60,7 @@ OLCF does not use a browser flow. Mint a token in the portal and paste it in:
    but job submission returns HTTP 401).
 3. Add it to `.env`:
    ```bash
-   echo "OLCF_IRI_TOKEN=<paste-the-token>" >> .env
+   echo "IRI_TOKEN_OLCF=<paste-the-token>" >> .env
    ```
 
 ### Globus Transfer — move data to/from any facility
@@ -123,7 +127,7 @@ server. Note the account names — you'll use them in Lab 08.
 account name — have the agent read it.
 
 > **OLCF note.** If `olcf-iri`'s `list_projects` returns 401 but status works,
-> your `OLCF_IRI_TOKEN` was issued **without the compute scope** — re-mint it from
+> your `IRI_TOKEN_OLCF` was issued **without the compute scope** — re-mint it from
 > myOLCF with compute enabled (see [PREREQUISITES.md](../PREREQUISITES.md#olcf--frontier--a-manually-issued-api-token)).
 
 ## Step 5 — Look around your filesystems

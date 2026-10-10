@@ -320,7 +320,7 @@ terminal coding agent, still billed to your AmSC project through MAG. Anywhere a
 lab shows the `claude` command, run `opencode` instead.
 
 The repo ships an `opencode.jsonc` at its root that wires opencode to the **same
-five MCP servers** Claude Code gets from `.mcp.json`, points it at **MAG** as its
+four MCP servers** Claude Code gets from `.mcp.json`, points it at **MAG** as its
 model provider, and loads the **same `AGENTS.md`** instructions. One important
 detail is baked in: MAG is an **OpenAI-compatible** gateway, so opencode talks to
 it over the OpenAI wire at `…/v1` — the Anthropic wire returns a redirect opencode
@@ -353,7 +353,7 @@ round-trip, exactly as in Step 4 for Claude Code. Models other than the default
 `provider.mag.models` block in `opencode.jsonc` lists the ones MAG serves.
 
 > **The MCP servers aren't usable yet — that's expected in Part 1.** `opencode.jsonc`
-> already wires all five servers, but they need the **Part 3** Python dependencies
+> already wires all four servers, but they need the **Part 3** Python dependencies
 > (`requirements.txt`, installed in [PREREQUISITES.md](../PREREQUISITES.md)) before
 > they can start. opencode still *tries* to launch them, so until those deps are in
 > place they show up as **failed/unavailable** under `/mcp` (if at all) and their

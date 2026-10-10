@@ -3,7 +3,7 @@
 //
 // opencode configuration for the "Hands-On: Agentic AI for AmSC" tutorial.
 // This is the agent-agnostic twin of .mcp.json (Claude Code): it points opencode
-// at the SAME five MCP servers AND at a model provider, so every lab in this
+// at the SAME four MCP servers AND at a model provider, so every lab in this
 // track runs identically under opencode for users without Claude access.
 //
 // MAG is an OpenAI-compatible (LiteLLM) gateway. opencode must talk to it over
@@ -34,7 +34,7 @@
   // Pick the model opencode launches with (provider/model).
   "model": "mag/claude-sonnet-4-6",
 
-  // The same five MCP servers Claude Code gets from .mcp.json.
+  // The same four MCP servers Claude Code gets from .mcp.json.
   "mcp": {
     "alcf-iri": {
       "type": "local",
@@ -49,11 +49,6 @@
     "olcf-iri": {
       "type": "local",
       "command": ["python", "mcp/hpc/olcf_iri_server.py"],
-      "enabled": true
-    },
-    "globus-compute": {
-      "type": "local",
-      "command": ["python", "mcp/compute/globus_compute_server.py"],
       "enabled": true
     },
     "knowledge": {

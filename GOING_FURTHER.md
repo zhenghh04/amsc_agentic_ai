@@ -86,23 +86,6 @@ This is a future **Part 4** of the track. Everything you built in Parts 1–3 �
 grounded prompts, verification, the submit-monitor-retrieve loop, cross-facility
 portability — is exactly what a campaign is made of.
 
-## Appendices — under the hood (optional)
-
-Parts 1–3 used two convenient abstractions: **MCP tools** (you asked, a tool ran)
-and **the agent** (it reasoned and called tools for you). These two bonus pages
-open each one up — there's nothing you *must* run, they're here so neither layer
-stays a black box. Both mirror ALCF's
-[Service-Enabled Science](https://github.com/argonne-lcf/Service_Enabled_Science)
-workshop, adapted to this tutorial's stack.
-
-- **[Bonus A — the raw Facility REST API](going_further/A_raw_facility_rest.md)** —
-  the single HTTPS request the `alcf-iri` `submit_job` tool makes underneath, plus
-  a comparison of `alcf-tokens` (ALCF's official token CLI) and the bundled
-  `scripts/auth/*.py` helpers.
-- **[Bonus B — the chat-completion → agent loop](going_further/B_chat_completion_agent_loop.md)** —
-  the ~20 lines of code that turn a stateless model into an agent, pointed at MAG.
-  What Claude Code and opencode are actually doing.
-
 ## Where to learn more
 
 - ALCF: <https://docs.alcf.anl.gov> · <https://my.alcf.anl.gov> · support@alcf.anl.gov

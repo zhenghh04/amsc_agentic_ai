@@ -169,7 +169,7 @@ skip ahead and come back — nothing here is a dead end.
 **A read-only call returns 401**
 : `list_resources`/`get_system_status` need no auth, but `list_projects` does.
   Run that facility's auth step in [PREREQUISITES.md](PREREQUISITES.md) Step 2.
-  For OLCF, confirm your `OLCF_IRI_TOKEN` was issued **with the compute scope**.
+  For OLCF, confirm your `IRI_TOKEN_OLCF` was issued **with the compute scope**.
 
 ## Lab 08 — IRI job submission (Part 3)
 
@@ -194,38 +194,6 @@ skip ahead and come back — nothing here is a dead end.
 **Reaching your laptop**
 : You need a Globus Connect Personal endpoint on the laptop. No GCP? Transfer
   *between* two facility paths instead — the workflow is identical.
-
-## Lab 09 — Remote functions (Globus Compute, Part 3)
-
-**`ManagerLost` / serialization error**
-: The function was pickled across Python versions. `register_function` ships the
-  **source** instead, so the worker recompiles it locally — register from source,
-  and put **every `import` inside the function body**.
-
-**File not found on the compute node**
-: The function runs *on the node*, so any path it touches must be on a
-  node-visible filesystem — on Polaris that's `home`, `eagle`, or `grand`.
-  **Polaris cannot see Aurora's `/flare`.** The server injects
-  `filesystems=home:eagle:grand` for the known MEPs unless you set your own
-  `scheduler_options`.
-
-**Endpoint offline / task never starts**
-: Check `get_endpoint_status("polaris")` first — an offline MEP means stop here.
-  A task that stays queued usually means the `account`/`queue` in
-  `user_endpoint_config` is wrong; verify with `get_project_allocations` (Lab 07).
-
-**A task is running away and you want to stop it**
-: You can't. Unlike an IRI batch job (`cancel_job`), a Globus Compute task has no
-  cancel. Closing the chat or giving up on `get_result` only stops you *watching*
-  it — the task stays eligible to run, and once nodes are allocated to it, it
-  bills them until it finishes, fails, or hits the scheduler walltime. Set that
-  bound up front instead: a short `"walltime"` in `user_endpoint_config` and 1
-  node.
-
-**Auth / 401 on a compute call**
-: The compute token expired. Re-run `python scripts/auth/globus_auth.py
-  ensure_valid` (it refreshes and re-syncs `.env`); the server re-reads it on the
-  next call, no restart.
 
 ## Lab 10 — Spine across facilities (capstone)
 
