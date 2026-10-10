@@ -18,12 +18,17 @@ from context_utils import bounded_file_text, clamp_int
 logger = logging.getLogger(__name__)
 
 # .env file lives in the project root directory (parent of mcp/)
-# Per-user .env resolution centralized in mcp/trinity_env.py (Claude Code strips
-# CLAUDE_* from project MCP server env; trinity_env reads a non-CLAUDE var instead).
+# Per-user .env resolution centralized in mcp/auth_env.py (Claude Code strips
+# CLAUDE_* from project MCP server env; auth_env reads a non-CLAUDE var instead).
 import sys as _sys
 _sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from trinity_env import env_file as _trinity_env_file, read_value as _read_env_value
-_ENV_FILE = _trinity_env_file()
+from auth_env import (
+    env_file as _auth_env_file,
+    read_value as _read_env_value,
+    read_token as _read_token,
+    write_token_names as _write_token_names,
+)
+_ENV_FILE = _auth_env_file()
 def _load_env() -> None:
     """Load .env file into os.environ (without overwriting existing non-empty vars)."""
     if not _ENV_FILE.exists():
@@ -49,9 +54,7 @@ mcp = FastMCP("alcf-iri")
 client = ALCFIRIClient()
 # Always re-read tokens from the file on every request (never trust a value
 # cached at startup). See _read_env_value.
-client.token_provider = lambda: (
-    _read_env_value("ALCF_IRI_TOKEN") or _read_env_value("ALCF_IRI_ACCESS_TOKEN")
-)
+client.token_provider = lambda: _read_token("alcf")
 client.transfer_token_provider = lambda: _read_env_value("GLOBUS_TRANSFER_TOKEN")
 
 
@@ -101,23 +104,25 @@ async def authenticate(token: str = "") -> str:
 
     Args:
         token: A valid Globus OAuth2 access token for the ALCF IRI API.
-               If empty, falls back to ALCF_IRI_TOKEN / ALCF_IRI_ACCESS_TOKEN
-               in .env (re-read at call time). So a bare authenticate()
-               succeeds whenever .env already has a fresh token.
+               If empty, falls back to IRI_TOKEN_ALCF / ALCF_IRI_TOKEN /
+               ALCF_IRI_ACCESS_TOKEN in .env (re-read at call time). So a bare
+               authenticate() succeeds whenever .env already has a fresh token.
 
     Call this before using tools that require authentication (account,
     compute, filesystem). Facility and status tools work without auth.
     """
     # Read the token straight from the file (os.environ may hold a stale value
     # cached at server start; _load_env never overwrites it).
-    token = token or _read_env_value("ALCF_IRI_TOKEN") or _read_env_value("ALCF_IRI_ACCESS_TOKEN")
+    token = token or _read_token("alcf")
     if not token:
+        names = " / ".join(_write_token_names("alcf"))
         return (
-            f"Error: no token provided and ALCF_IRI_TOKEN not found in {_ENV_FILE}. "
+            f"Error: no token provided and none of {names} found in {_ENV_FILE}. "
             "Run `python scripts/auth/alcf_iri_token.py` to obtain one, then retry."
         )
     client.set_token(token)
-    _update_env("ALCF_IRI_TOKEN", token)
+    for _name in _write_token_names("alcf"):
+        _update_env(_name, token)
     # Verify by fetching projects
     try:
         projects = await client.list_projects()

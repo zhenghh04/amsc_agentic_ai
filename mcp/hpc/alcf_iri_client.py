@@ -6,10 +6,14 @@
 import asyncio
 import json
 import os
+import sys
 import tempfile
 from pathlib import Path
 
 import httpx
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # mcp/ root
+from auth_env import environ_token as _environ_token
 
 DEFAULT_BASE_URL = "https://api.alcf.anl.gov/api/v1"
 GLOBUS_TRANSFER_BASE_URL = "https://transfer.api.globus.org/v0.10"
@@ -45,7 +49,7 @@ class ALCFIRIClient:
 
     def __init__(self) -> None:
         self.base_url = os.environ.get("ALCF_IRI_BASE_URL", DEFAULT_BASE_URL).rstrip("/")
-        self.token: str | None = os.environ.get("ALCF_IRI_TOKEN") or os.environ.get("ALCF_IRI_ACCESS_TOKEN")
+        self.token: str | None = _environ_token("alcf") or None
         self.transfer_token: str | None = os.environ.get("GLOBUS_TRANSFER_TOKEN")
         # Optional callables that return the CURRENT token from its source of
         # truth (the per-user .env file). Set by the server so every request

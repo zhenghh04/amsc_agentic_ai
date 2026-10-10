@@ -17,12 +17,17 @@ from nersc_iri_client import NERSCIRIClient
 
 logger = logging.getLogger(__name__)
 
-# Per-user .env resolution centralized in mcp/trinity_env.py (Claude Code strips
-# CLAUDE_* from project MCP server env; trinity_env reads a non-CLAUDE var instead).
+# Per-user .env resolution centralized in mcp/auth_env.py (Claude Code strips
+# CLAUDE_* from project MCP server env; auth_env reads a non-CLAUDE var instead).
 import sys as _sys
 _sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from trinity_env import env_file as _trinity_env_file, read_value as _read_env_value
-_ENV_FILE = _trinity_env_file()
+from auth_env import (
+    env_file as _auth_env_file,
+    read_value as _read_env_value,
+    read_token as _read_token,
+    write_token_names as _write_token_names,
+)
+_ENV_FILE = _auth_env_file()
 def _load_env() -> None:
     if not _ENV_FILE.exists():
         return
@@ -45,8 +50,8 @@ _load_env()
 mcp = FastMCP("nersc-iri")
 client = NERSCIRIClient()
 # Always re-read tokens from the file on every request (never trust a value
-# cached at startup). See trinity_env.read_value.
-client.token_provider = lambda: _read_env_value("NERSC_IRI_TOKEN") or _read_env_value("NERSC_IRI_ACCESS_TOKEN")
+# cached at startup). See auth_env.read_value.
+client.token_provider = lambda: _read_token("nersc")
 client.transfer_token_provider = lambda: _read_env_value("GLOBUS_TRANSFER_TOKEN")
 
 
@@ -79,22 +84,24 @@ async def authenticate(token: str = "") -> str:
     Args:
         token: A valid NERSC IRI Bearer token. Obtain one by running:
                python scripts/auth/nersc_iri_token.py
-               If empty, falls back to NERSC_IRI_TOKEN in .env (re-read
-               at call time). So a bare authenticate() succeeds whenever
-               .env already has a fresh token.
+               If empty, falls back to IRI_TOKEN_NERSC / NERSC_IRI_TOKEN in
+               .env (re-read at call time). So a bare authenticate() succeeds
+               whenever .env already has a fresh token.
 
     Call this before using tools that require authentication.
     Status tools work without auth.
     """
     # Read straight from the file (os.environ may hold a stale startup value).
-    token = token or _read_env_value("NERSC_IRI_TOKEN") or _read_env_value("NERSC_IRI_ACCESS_TOKEN")
+    token = token or _read_token("nersc")
     if not token:
+        names = " / ".join(_write_token_names("nersc"))
         return (
-            f"Error: no token provided and NERSC_IRI_TOKEN not found in {_ENV_FILE}. "
+            f"Error: no token provided and none of {names} found in {_ENV_FILE}. "
             "Run `python scripts/auth/nersc_iri_token.py` to obtain one, then retry."
         )
     client.set_token(token)
-    _update_env("NERSC_IRI_TOKEN", token)
+    for _name in _write_token_names("nersc"):
+        _update_env(_name, token)
     try:
         account = await client.get_account()
         uids = account.get("user_ids") or []
@@ -106,17 +113,19 @@ async def authenticate(token: str = "") -> str:
 
 @mcp.tool()
 async def fetch_token() -> str:
-    """Validate the stored NERSC_IRI_TOKEN from .env.
+    """Validate the stored NERSC IRI token from .env.
 
     NERSC IRI tokens are obtained interactively via
     `python scripts/auth/nersc_iri_token.py` (Globus OAuth2 flow). This tool
-    just verifies that the token currently in NERSC_IRI_TOKEN is still
-    valid; it cannot mint a new one non-interactively.
+    just verifies that the token currently in IRI_TOKEN_NERSC (or the legacy
+    NERSC_IRI_TOKEN) is still valid; it cannot mint a new one
+    non-interactively.
     """
-    existing = _read_env_value("NERSC_IRI_TOKEN") or _read_env_value("NERSC_IRI_ACCESS_TOKEN")
+    existing = _read_token("nersc")
     if not existing:
+        names = " / ".join(_write_token_names("nersc"))
         return (
-            "No NERSC_IRI_TOKEN in .env. "
+            f"No NERSC IRI token in .env (looked for {names}). "
             "Run `python scripts/auth/nersc_iri_token.py` to obtain one."
         )
     client.set_token(existing)
@@ -124,10 +133,10 @@ async def fetch_token() -> str:
         account = await client.get_account()
         uids = account.get("user_ids") or []
         username = uids[0] if uids else account.get("username", "unknown")
-        return f"Using stored NERSC_IRI_TOKEN — authenticated as '{username}'."
+        return f"Using stored NERSC IRI token — authenticated as '{username}'."
     except Exception as exc:
         return (
-            f"Stored NERSC_IRI_TOKEN present but verification failed: {exc}. "
+            f"Stored NERSC IRI token present but verification failed: {exc}. "
             "Refresh with `python scripts/auth/nersc_iri_token.py`."
         )
 

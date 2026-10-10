@@ -30,10 +30,14 @@ Transfer for file movement; the OLCF DTN Globus endpoint UUID is
 
 import asyncio
 import os
+import sys
 import tempfile
 from pathlib import Path
 
 import httpx
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # mcp/ root
+from auth_env import environ_token as _environ_token
 
 DEFAULT_BASE_URL = "https://amsc-moderate.s3m.olcf.ornl.gov"
 GLOBUS_TRANSFER_BASE_URL = "https://transfer.api.globus.org/v0.10"
@@ -52,7 +56,7 @@ class OLCFIRIClient:
 
     def __init__(self) -> None:
         self.base_url = os.environ.get("OLCF_IRI_BASE_URL", DEFAULT_BASE_URL).rstrip("/")
-        self.token: str | None = os.environ.get("OLCF_IRI_TOKEN")
+        self.token: str | None = _environ_token("olcf") or None
         self.transfer_token: str | None = os.environ.get("GLOBUS_TRANSFER_TOKEN")
         # Callables returning the CURRENT token from the per-user .env file, set
         # by the server so every request re-reads the freshest token instead of

@@ -30,12 +30,17 @@ from olcf_iri_client import OLCFIRIClient
 
 logger = logging.getLogger(__name__)
 
-# Per-user .env resolution centralized in mcp/trinity_env.py (Claude Code strips
-# CLAUDE_* from project MCP server env; trinity_env reads a non-CLAUDE var instead).
+# Per-user .env resolution centralized in mcp/auth_env.py (Claude Code strips
+# CLAUDE_* from project MCP server env; auth_env reads a non-CLAUDE var instead).
 import sys as _sys
 _sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from trinity_env import env_file as _trinity_env_file, read_value as _read_env_value
-_ENV_FILE = _trinity_env_file()
+from auth_env import (
+    env_file as _auth_env_file,
+    read_value as _read_env_value,
+    read_token as _read_token,
+    write_token_names as _write_token_names,
+)
+_ENV_FILE = _auth_env_file()
 def _load_env() -> None:
     if not _ENV_FILE.exists():
         return
@@ -58,8 +63,8 @@ _load_env()
 mcp = FastMCP("olcf-iri")
 client = OLCFIRIClient()
 # Always re-read tokens from the file on every request (never trust a value
-# cached at startup). See trinity_env.read_value.
-client.token_provider = lambda: _read_env_value("OLCF_IRI_TOKEN")
+# cached at startup). See auth_env.read_value.
+client.token_provider = lambda: _read_token("olcf")
 client.transfer_token_provider = lambda: _read_env_value("GLOBUS_TRANSFER_TOKEN")
 
 
@@ -127,9 +132,9 @@ async def authenticate(token: str = "") -> str:
     Args:
         token: A valid OLCF IRI Project Access Token (issued at
                https://my.olcf.ornl.gov → Projects → API Tokens).
-               If empty, falls back to OLCF_IRI_TOKEN in .env (re-read
-               at call time). So a bare authenticate() succeeds whenever
-               .env already has a fresh JWT.
+               If empty, falls back to IRI_TOKEN_OLCF / OLCF_IRI_TOKEN in
+               .env (re-read at call time). So a bare authenticate() succeeds
+               whenever .env already has a fresh JWT.
 
     The token is bound to the host it was issued against
     (amsc-moderate.s3m.olcf.ornl.gov by default). For compute submission
@@ -141,16 +146,18 @@ async def authenticate(token: str = "") -> str:
     a literal shell placeholder like ${OLCF_IRI_TOKEN}). This guards
     against accidentally clobbering a working token in .env.
 
-    Call this before using compute tools. Saved to .env as OLCF_IRI_TOKEN.
+    Call this before using compute tools. Saved to .env as IRI_TOKEN_OLCF
+    (and the legacy OLCF_IRI_TOKEN).
     """
     # Re-read .env in case the token was rotated after the server started.
     # OLCF tokens are manual-refresh only (myOLCF web UI); this just picks
     # up a freshly-pasted value without me having to grep .env.
     # Read straight from the file (os.environ may hold a stale startup value).
-    token = token or _read_env_value("OLCF_IRI_TOKEN")
+    token = token or _read_token("olcf")
     if not token:
+        names = " / ".join(_write_token_names("olcf"))
         return (
-            f"Error: no token provided and OLCF_IRI_TOKEN not found in {_ENV_FILE}. "
+            f"Error: no token provided and none of {names} found in {_ENV_FILE}. "
             "Issue one at https://my.olcf.ornl.gov (Projects → API Tokens, "
             "scope=compute), paste it into .env, then retry."
         )
@@ -162,7 +169,8 @@ async def authenticate(token: str = "") -> str:
             f"(Projects → API Tokens, scope=compute) and pass the literal JWT value."
         )
     client.set_token(token)
-    _update_env("OLCF_IRI_TOKEN", token)
+    for _name in _write_token_names("olcf"):
+        _update_env(_name, token)
     try:
         f = await client.get_facility()
         return (

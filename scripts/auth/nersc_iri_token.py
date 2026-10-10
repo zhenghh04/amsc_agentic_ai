@@ -38,7 +38,7 @@ AUTH_CLIENT_ID = "fae5c579-490a-4d76-b6eb-d78f65caeb63"
 SCOPE_CLIENT_ID = "ed3e577d-f7f3-4639-b96e-ff5a8445d699"
 SCOPE_STRING = f"https://auth.globus.org/scopes/{SCOPE_CLIENT_ID}/iri_api"
 AUTH_SCOPES = ["openid", "profile", "email", "urn:globus:auth:scope:auth.globus.org:view_identities"]
-# Credentials .env file. Resolve like the MCP servers (mcp/trinity_env.py) so a
+# Credentials .env file. Resolve like the MCP servers (mcp/auth_env.py) so a
 # refreshed token lands in the SAME store the nersc-iri server reads:
 #   1. $TRINITY_ENV_DIR/.env   — per-user store (Trinity multi-tenant / local switch)
 #   2. $CLAUDE_ENV_FILE        — non-stripped contexts
@@ -54,6 +54,13 @@ def _resolve_env_file() -> pathlib.Path:
     return pathlib.Path(__file__).resolve().parent.parent.parent / ".env"
 
 ENV_FILE = _resolve_env_file()
+# The DOE IRI hands-on session standardized on IRI_TOKEN_<FACILITY>; this repo
+# originally used <FACILITY>_IRI_TOKEN. Write BOTH (see ENV_VARS) so the two can
+# never drift apart, and prefer the IRI spelling on read. Mirrors the alias
+# table in mcp/auth_env.py.
+ENV_VAR = "IRI_TOKEN_NERSC"
+ENV_VAR_LEGACY = "NERSC_IRI_TOKEN"
+ENV_VARS = (ENV_VAR, ENV_VAR_LEGACY)
 REFRESH_VAR = "NERSC_IRI_REFRESH_TOKEN"
 EXPIRES_VAR = "NERSC_IRI_EXPIRES_AT"
 
@@ -115,7 +122,8 @@ def _extract_token_data(token_response: globus_sdk.OAuthTokenResponse) -> dict:
 
 
 def _save_token_data(token_data: dict) -> None:
-    _update_env("NERSC_IRI_TOKEN", token_data["access_token"])
+    for _name in ENV_VARS:
+        _update_env(_name, token_data["access_token"])
     if token_data.get("refresh_token"):
         _update_env(REFRESH_VAR, token_data["refresh_token"])
     if token_data.get("expires_at_seconds"):
@@ -127,13 +135,19 @@ def _load_token_data() -> dict:
     if ENV_FILE.exists():
         for line in ENV_FILE.read_text().splitlines():
             for key, attr in [
-                ("NERSC_IRI_TOKEN", "access_token"),
+                (ENV_VAR, "access_token"),
+                (ENV_VAR_LEGACY, "_access_token_legacy"),
                 (REFRESH_VAR, "refresh_token"),
                 (EXPIRES_VAR, "expires_at_seconds"),
             ]:
                 if line.startswith(f"{key}=") or line.startswith(f"export {key}="):
                     data[attr] = line.split("=", 1)[1].strip().strip('"').strip("'")
                     break
+    # The legacy spelling is only a fallback: a file written before the rename
+    # has it alone, but when both are present the preferred name wins.
+    legacy = data.pop("_access_token_legacy", "")
+    if not data.get("access_token"):
+        data["access_token"] = legacy
     if not data.get("access_token"):
         raise NERSCAuthError(
             'No NERSC IRI token in .env. Run '
@@ -175,8 +189,9 @@ def authenticate(force_reauth: bool = False) -> dict:
         try:
             token_data = get_token_data(force_refresh=False)
             token = token_data["access_token"]
-            _update_env("NERSC_IRI_TOKEN", token)
-            os.environ["NERSC_IRI_TOKEN"] = token
+            for _name in ENV_VARS:
+                _update_env(_name, token)
+                os.environ[_name] = token
             expires = token_data.get("expires_at_seconds", 0)
             remaining = (expires - time.time()) / 3600
             print(f"Using existing NERSC token ({remaining:.1f}h remaining)")
@@ -203,12 +218,13 @@ def authenticate(force_reauth: bool = False) -> dict:
     _save_token_data(token_data)
 
     token = token_data["access_token"]
-    _update_env("NERSC_IRI_TOKEN", token)
-    os.environ["NERSC_IRI_TOKEN"] = token
+    for _name in ENV_VARS:
+        _update_env(_name, token)
+        os.environ[_name] = token
 
     expires = token_data.get("expires_at_seconds", 0)
     remaining = (expires - time.time()) / 3600
-    print(f"\nNERSC_IRI_TOKEN saved to {ENV_FILE}")
+    print(f"\n{' and '.join(ENV_VARS)} saved to {ENV_FILE}")
     print(f"Expires in {remaining:.1f} hours")
     print(f"Token: {token[:20]}...")
     return token_data
@@ -250,15 +266,16 @@ def get_time_until_token_expiration(units: str = "seconds") -> float:
 
 
 def logout() -> None:
-    _remove_env_keys(["NERSC_IRI_TOKEN", REFRESH_VAR, EXPIRES_VAR])
+    _remove_env_keys([*ENV_VARS, REFRESH_VAR, EXPIRES_VAR])
     print(f"NERSC IRI tokens removed from {ENV_FILE}")
 
 
 def ensure_valid() -> bool:
     """
-    Non-interactive: refresh the cached token if close to expiry and write
-    NERSC_IRI_TOKEN to .env. Returns True on success, False if no cached token
-    is present or the refresh fails (caller should run `authenticate`).
+    Non-interactive: refresh the cached token if close to expiry and write the
+    NERSC IRI token under every supported name (see ENV_VARS). Returns True on
+    success, False if no cached token is present or the refresh fails (caller
+    should run `authenticate`).
     """
     try:
         token_data = get_token_data(force_refresh=False)
@@ -269,11 +286,12 @@ def ensure_valid() -> bool:
         print(f"NERSC IRI ensure_valid failed: {exc}")
         return False
     token = token_data["access_token"]
-    _update_env("NERSC_IRI_TOKEN", token)
-    os.environ["NERSC_IRI_TOKEN"] = token
+    for name in ENV_VARS:
+        _update_env(name, token)
+        os.environ[name] = token
     expires = token_data.get("expires_at_seconds", 0)
     remaining = (expires - time.time()) / 3600
-    print(f"NERSC_IRI_TOKEN written to {ENV_FILE} ({remaining:.1f}h remaining)")
+    print(f"{' and '.join(ENV_VARS)} written to {ENV_FILE} ({remaining:.1f}h remaining)")
     return True
 
 

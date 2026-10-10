@@ -2,11 +2,11 @@
 # Author: Huihuo Zheng, huihuo.zheng@anl.gov
 # Copyright: Trinity Science 2026
 
-"""Unified Globus authentication for Transfer + Compute tokens.
+"""Unified Globus authentication for Transfer tokens.
 
-Performs a single OAuth2 login flow to obtain both Transfer and Compute
-tokens, stores them in one file, and auto-refreshes when expired.  The
-ALCF IRI token (different client ID) is handled by delegating to
+Performs a single OAuth2 login flow to obtain a Globus Transfer token,
+stores it in one file, and auto-refreshes when expired.  The ALCF IRI
+token (different client ID) is handled by delegating to
 alcf_iri_token.py via subprocess.
 
 Usage:
@@ -120,18 +120,12 @@ def _build_transfer_data_access_scope() -> str:
 # whole login into UNKNOWN_SCOPE_ERROR.
 TRANSFER_SCOPE = TRANSFER_ALL_SCOPE
 TRANSFER_DATA_ACCESS_SCOPE = _build_transfer_data_access_scope()
-COMPUTE_SCOPE = (
-    "https://auth.globus.org/scopes/facd7ccc-c5f4-42aa-916b-a0e270e2c2a9/all"
-)
-
 RESOURCE_SERVERS = {
     "transfer": "transfer.api.globus.org",
-    "compute": "funcx_service",
 }
 
 ENV_VAR_MAP = {
     "GLOBUS_TRANSFER_TOKEN": "transfer",
-    "GLOBUS_COMPUTE_TOKEN": "compute",
 }
 
 # Inverse: label -> env var name
@@ -158,9 +152,14 @@ _NERSC_IRI_TOKEN_SCRIPT = _AUTH_DIR / "nersc_iri_token.py"
 # ALCF Inference Gateway token script
 _INFERENCE_TOKEN_SCRIPT = _AUTH_DIR / "inference_auth_token.py"
 
-# Facility-specific Globus Compute token scripts
-_OLCF_GC_TOKEN_SCRIPT = _AUTH_DIR / "olcf_gc_token.py"
-_NERSC_GC_TOKEN_SCRIPT = _AUTH_DIR / "nersc_gc_token.py"
+# Accepted spellings for each facility's IRI token, preferred name first. The
+# DOE IRI hands-on session standardized on IRI_TOKEN_<FACILITY>; this repo
+# originally used <FACILITY>_IRI_TOKEN. Writes go to every name so the two can
+# never drift apart; reads take the first one present. Mirrors the alias table
+# in mcp/auth_env.py — keep the two in sync.
+_ALCF_IRI_VARS = ("IRI_TOKEN_ALCF", "ALCF_IRI_TOKEN")
+_NERSC_IRI_VARS = ("IRI_TOKEN_NERSC", "NERSC_IRI_TOKEN")
+_OLCF_IRI_VARS = ("IRI_TOKEN_OLCF", "OLCF_IRI_TOKEN")
 
 
 # ── .env Helpers ─────────────────────────────────────────────────────
@@ -244,7 +243,7 @@ def _load_tokens() -> dict | None:
 
 
 def _write_all_to_env(data: dict) -> None:
-    """Write all tokens to .env.  *data* is keyed by label (transfer/compute)."""
+    """Write all tokens to .env.  *data* is keyed by label (transfer)."""
     for label, token_info in data.items():
         env_var = _LABEL_TO_ENV.get(label)
         if not env_var or "access_token" not in token_info:
@@ -262,19 +261,24 @@ def _write_all_to_env(data: dict) -> None:
 
 def _ensure_delegated_token(
     script: pathlib.Path,
-    env_var: str,
+    env_var: str | tuple[str, ...],
     *,
     interactive: bool = False,
     force: bool = False,
 ) -> bool:
-    """Run a delegated token script, write the resulting token to .env.
+    """Run a delegated token script, store the resulting token.
 
     - force=True: always run `authenticate --force-reauth` first (forces a
       fresh browser login), then capture the new token via get_access_token.
     - force=False, interactive=True: try get_access_token first; if it fails,
       fall back to interactive `authenticate` (which may reuse a cached token).
     - force=False, interactive=False: only attempt get_access_token (silent).
+
+    ``env_var`` may be a tuple of names, in which case the token is written
+    under every one of them — the IRI facility tokens carry two accepted
+    spellings and must stay in sync (see mcp/auth_env.py).
     """
+    env_vars = (env_var,) if isinstance(env_var, str) else tuple(env_var)
     if not script.is_file():
         return True  # script not present, skip
 
@@ -301,8 +305,9 @@ def _ensure_delegated_token(
         )
         if result.returncode == 0 and result.stdout.strip():
             token = result.stdout.strip()
-            _update_env(env_var, token)
-            os.environ[env_var] = token
+            for name in env_vars:
+                _update_env(name, token)
+                os.environ[name] = token
             return True
     except Exception:
         pass
@@ -327,8 +332,9 @@ def _ensure_delegated_token(
             )
             if result.returncode == 0 and result.stdout.strip():
                 token = result.stdout.strip()
-                _update_env(env_var, token)
-                os.environ[env_var] = token
+                for name in env_vars:
+                    _update_env(name, token)
+                    os.environ[name] = token
                 return True
         except Exception:
             pass
@@ -339,7 +345,7 @@ def _ensure_delegated_token(
 def _ensure_iri_token(interactive: bool = False, force: bool = False) -> bool:
     """Ensure a valid ALCF IRI token, delegating to alcf_iri_token.py."""
     return _ensure_delegated_token(
-        _IRI_TOKEN_SCRIPT, "ALCF_IRI_TOKEN",
+        _IRI_TOKEN_SCRIPT, _ALCF_IRI_VARS,
         interactive=interactive, force=force,
     )
 
@@ -347,7 +353,7 @@ def _ensure_iri_token(interactive: bool = False, force: bool = False) -> bool:
 def _ensure_nersc_iri_token(interactive: bool = False, force: bool = False) -> bool:
     """Ensure a valid NERSC IRI token, delegating to nersc_iri_token.py."""
     return _ensure_delegated_token(
-        _NERSC_IRI_TOKEN_SCRIPT, "NERSC_IRI_TOKEN",
+        _NERSC_IRI_TOKEN_SCRIPT, _NERSC_IRI_VARS,
         interactive=interactive, force=force,
     )
 
@@ -356,22 +362,6 @@ def _ensure_inference_token(interactive: bool = False, force: bool = False) -> b
     """Ensure a valid ALCF Inference Gateway token, delegating to inference_auth_token.py."""
     return _ensure_delegated_token(
         _INFERENCE_TOKEN_SCRIPT, "ALCF_INFERENCE_TOKEN",
-        interactive=interactive, force=force,
-    )
-
-
-def _ensure_olcf_gc_token(interactive: bool = False, force: bool = False) -> bool:
-    """Ensure a valid OLCF Globus Compute token, delegating to olcf_gc_token.py."""
-    return _ensure_delegated_token(
-        _OLCF_GC_TOKEN_SCRIPT, "OLCF_COMPUTE_TOKEN",
-        interactive=interactive, force=force,
-    )
-
-
-def _ensure_nersc_gc_token(interactive: bool = False, force: bool = False) -> bool:
-    """Ensure a valid NERSC Globus Compute token, delegating to nersc_gc_token.py."""
-    return _ensure_delegated_token(
-        _NERSC_GC_TOKEN_SCRIPT, "NERSC_COMPUTE_TOKEN",
         interactive=interactive, force=force,
     )
 
@@ -451,22 +441,31 @@ def _get_inference_expiry() -> str:
     return ""
 
 
-def _get_jwt_env_expiry(env_var: str) -> str:
+def _get_jwt_env_expiry(env_var: str | tuple[str, ...]) -> str:
     """Return human-readable expiry for a JWT stored in .env under *env_var*.
 
-    Used for myOLCF-issued Project Access Tokens (OLCF_IRI_TOKEN, OLCF_S3M_TOKEN)
-    which live only in .env — there is no helper script that can refresh them.
-    PATs (type=opat) typically have no `exp` claim — they live until revoked —
-    so we report "no expiry" rather than treating absence-of-exp as expired.
+    Used for myOLCF-issued Project Access Tokens (IRI_TOKEN_OLCF/OLCF_IRI_TOKEN,
+    OLCF_S3M_TOKEN) which live only in .env — there is no helper script that can
+    refresh them. PATs (type=opat) typically have no `exp` claim — they live
+    until revoked — so we report "no expiry" rather than treating
+    absence-of-exp as expired.
+
+    *env_var* may be a tuple of accepted spellings, in which case the first one
+    present in .env wins — matching the read order the clients use.
     """
     if not ENV_FILE.exists():
         return ""
-    token = ""
-    prefix = f"{env_var}="
+    env_vars = (env_var,) if isinstance(env_var, str) else tuple(env_var)
+    found: dict[str, str] = {}
     for line in ENV_FILE.read_text().splitlines():
-        if line.startswith(prefix):
-            token = line.split("=", 1)[1].strip().strip('"').strip("'")
-            break
+        for name in env_vars:
+            if name in found or not line.startswith(f"{name}="):
+                continue
+            value = line.split("=", 1)[1].strip().strip('"').strip("'")
+            # An unexpanded ${VAR} placeholder is as good as absent.
+            if value and not value.startswith("${"):
+                found[name] = value
+    token = next((found[name] for name in env_vars if name in found), "")
     if not token or token.count(".") != 2:
         return ""
     import base64
@@ -485,31 +484,8 @@ def _get_jwt_env_expiry(env_var: str) -> str:
     return ""
 
 
-def _get_delegated_expiry(script: pathlib.Path) -> str:
-    """Return human-readable expiry for a facility GC token script.
-
-    Reads the token JSON sidecar (named <stem>_tokens.json under ~/.globus/)
-    directly rather than calling a subcommand, since olcf/nersc_gc_token.py
-    don't expose get_time_until_token_expiration.
-    """
-    stem = script.stem
-    token_file = pathlib.Path.home() / ".globus" / f"{stem.replace('_token', '_tokens')}.json"
-    if not token_file.exists():
-        return ""
-    try:
-        data = json.loads(token_file.read_text())
-        entry = data.get("funcx_service", {})
-        exp = entry.get("expires_at_seconds", 0)
-        now = time.time()
-        if entry.get("access_token") and exp > now + 60:
-            return f"{(exp - now) / 3600:.1f}h remaining"
-    except Exception:
-        pass
-    return ""
-
-
 def _print_all_tokens() -> None:
-    """Print all tokens we manage (Transfer, Compute, ALCF IRI, NERSC IRI, Inference).
+    """Print all tokens we manage (Transfer, ALCF IRI, NERSC IRI, Inference).
 
     Reads the Globus tokens from disk and the delegated tokens by invoking
     each helper script's `get_access_token` action.  Prints each on its own
@@ -517,7 +493,7 @@ def _print_all_tokens() -> None:
     """
     print("\n=== Tokens ===")
 
-    # Globus Transfer + Compute (loaded from .env).
+    # Globus Transfer (loaded from .env).
     token_data = _load_tokens() or {}
     for label, rs_key in RESOURCE_SERVERS.items():
         token = token_data.get(rs_key, {}).get("access_token", "")
@@ -525,13 +501,12 @@ def _print_all_tokens() -> None:
         print(f"\n{env_var}:")
         print(token if token else "(not available)")
 
-    # Delegated tokens.
+    # Delegated tokens. The IRI entries are labelled with the preferred
+    # spelling; the legacy alias carries the same value (see _ALCF_IRI_VARS).
     for env_var, script in (
-        ("ALCF_IRI_TOKEN", _IRI_TOKEN_SCRIPT),
-        ("NERSC_IRI_TOKEN", _NERSC_IRI_TOKEN_SCRIPT),
+        (_ALCF_IRI_VARS[0], _IRI_TOKEN_SCRIPT),
+        (_NERSC_IRI_VARS[0], _NERSC_IRI_TOKEN_SCRIPT),
         ("ALCF_INFERENCE_TOKEN", _INFERENCE_TOKEN_SCRIPT),
-        ("OLCF_COMPUTE_TOKEN", _OLCF_GC_TOKEN_SCRIPT),
-        ("NERSC_COMPUTE_TOKEN", _NERSC_GC_TOKEN_SCRIPT),
     ):
         token = ""
         if script.is_file():
@@ -590,10 +565,9 @@ def _print_auth_api_error(exc: Exception) -> None:
 
 
 def authenticate(*, include_data_access: bool = False) -> dict | None:
-    """Run browser-based OAuth2 login for Transfer + Compute."""
+    """Run browser-based OAuth2 login for Globus Transfer."""
     client = globus_sdk.NativeAppAuthClient(CLIENT_ID)
-    transfer_scope = TRANSFER_DATA_ACCESS_SCOPE if include_data_access else TRANSFER_SCOPE
-    scopes = f"{transfer_scope} {COMPUTE_SCOPE}"
+    scopes = TRANSFER_DATA_ACCESS_SCOPE if include_data_access else TRANSFER_SCOPE
     client.oauth2_start_flow(requested_scopes=scopes, refresh_tokens=True)
 
     authorize_url = client.oauth2_get_authorize_url(
@@ -632,7 +606,7 @@ def authenticate(*, include_data_access: bool = False) -> dict | None:
             label_data[label] = token_data[rs_key]
     _write_all_to_env(label_data)
 
-    print(f"Globus Transfer/Compute tokens saved to {ENV_FILE}")
+    print(f"Globus Transfer token saved to {ENV_FILE}")
 
     # Force a fresh interactive login for every other token we manage so
     # `authenticate` always returns a complete, freshly-issued token set.
@@ -648,7 +622,7 @@ def authenticate(*, include_data_access: bool = False) -> dict | None:
 
     if not delegated_ok:
         print(
-            "Transfer/Compute tokens were saved, but one or more secondary "
+            "The Transfer token was saved, but one or more secondary "
             "tokens failed. Run `python scripts/auth/globus_auth.py status` to see "
             "what is still missing."
         )
@@ -713,12 +687,10 @@ def ensure_valid() -> bool:
             label_data[label] = token_data[rs_key]
     _write_all_to_env(label_data)
 
-    # Handle IRI + Inference + facility GC tokens (best-effort; does not affect return value)
+    # Handle IRI + Inference tokens (best-effort; does not affect return value)
     _ensure_iri_token(interactive=False)
     _ensure_nersc_iri_token(interactive=False)
     _ensure_inference_token(interactive=False)
-    _ensure_olcf_gc_token(interactive=False)
-    _ensure_nersc_gc_token(interactive=False)
 
     return True
 
@@ -763,7 +735,7 @@ def status() -> None:
         print(f"  {'nersc_iri':10s}: (no script)")
 
     # OLCF IRI / S3M tokens (manual JWT PATs, refreshed via myOLCF web UI only)
-    for label, env_var in (("olcf_iri", "OLCF_IRI_TOKEN"), ("olcf_s3m", "OLCF_S3M_TOKEN")):
+    for label, env_var in (("olcf_iri", _OLCF_IRI_VARS), ("olcf_s3m", "OLCF_S3M_TOKEN")):
         expiry = _get_jwt_env_expiry(env_var)
         if expiry:
             print(f"  {label:10s}: {expiry}")
@@ -779,24 +751,14 @@ def status() -> None:
     else:
         print(f"  {'inference':10s}: (no script)")
 
-    # Facility Globus Compute tokens
-    for label, script in (("olcf_gc", _OLCF_GC_TOKEN_SCRIPT), ("nersc_gc", _NERSC_GC_TOKEN_SCRIPT)):
-        if not script.is_file():
-            continue
-        expiry = _get_delegated_expiry(script)
-        if expiry:
-            print(f"  {label:10s}: {expiry}")
-        else:
-            print(f"  {label:10s}: EXPIRED or NOT FOUND")
-
 
 def logout() -> None:
-    """Remove Globus Transfer/Compute tokens from .env."""
+    """Remove Globus Transfer tokens from .env."""
     keys: list[str] = []
     for env_var in ENV_VAR_MAP:
         keys += [env_var, env_var + "_REFRESH", env_var + "_EXPIRES_AT"]
     _remove_env_keys(keys)
-    print(f"Globus Transfer/Compute tokens removed from {ENV_FILE}")
+    print(f"Globus Transfer tokens removed from {ENV_FILE}")
 
 
 DEFAULT_SESSION_DOMAIN = "sso.ccs.ornl.gov"
@@ -809,8 +771,7 @@ def get_url(
 ) -> str | None:
     """Print the auth URL and save PKCE state for later exchange (non-interactive)."""
     client = globus_sdk.NativeAppAuthClient(CLIENT_ID)
-    transfer_scope = TRANSFER_DATA_ACCESS_SCOPE if include_data_access else TRANSFER_SCOPE
-    scopes = f"{transfer_scope} {COMPUTE_SCOPE}"
+    scopes = TRANSFER_DATA_ACCESS_SCOPE if include_data_access else TRANSFER_SCOPE
     client.oauth2_start_flow(requested_scopes=scopes, refresh_tokens=True)
 
     verifier = getattr(client.current_oauth2_flow_manager, "verifier", None)

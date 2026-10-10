@@ -53,7 +53,7 @@ AUTH_SCOPES = ["openid", "profile", "email"]
 # Project .env file
 def _resolve_env_file() -> pathlib.Path:
     """Credentials .env: $TRINITY_ENV_DIR/.env → $CLAUDE_ENV_FILE → repo-root/.env.
-    Mirrors mcp/trinity_env.py so refreshed tokens land where the MCP servers read
+    Mirrors mcp/auth_env.py so refreshed tokens land where the MCP servers read
     them (bug fix: this script lives in scripts/auth/, so repo root is
     parent.parent.PARENT, not parent.parent → scripts/.env)."""
     import os
@@ -66,7 +66,13 @@ def _resolve_env_file() -> pathlib.Path:
     return pathlib.Path(__file__).resolve().parent.parent.parent / ".env"
 
 ENV_FILE = _resolve_env_file()
-ENV_VAR = "ALCF_IRI_TOKEN"
+# The DOE IRI hands-on session standardized on IRI_TOKEN_<FACILITY>; this repo
+# originally used <FACILITY>_IRI_TOKEN. Write BOTH (see ENV_VARS) so the two can
+# never drift apart, and prefer the IRI spelling on read. Mirrors the alias
+# table in mcp/auth_env.py.
+ENV_VAR = "IRI_TOKEN_ALCF"
+ENV_VAR_LEGACY = "ALCF_IRI_TOKEN"
+ENV_VARS = (ENV_VAR, ENV_VAR_LEGACY)
 REFRESH_VAR = "ALCF_IRI_REFRESH_TOKEN"
 EXPIRES_VAR = "ALCF_IRI_EXPIRES_AT"
 
@@ -173,7 +179,7 @@ class _TokenPageHandler(BaseHTTPRequestHandler):
             return
 
         self.server.html_state["logged_out"] = True
-        _remove_env_keys([ENV_VAR, REFRESH_VAR, EXPIRES_VAR])
+        _remove_env_keys([*ENV_VARS, REFRESH_VAR, EXPIRES_VAR])
         self.server.html_state["html"] = _build_logged_out_html()
         self.server.html_state["hold_until"] = time.time() + POST_LOGOUT_HOLD_SECONDS
         body = json.dumps({"ok": True}).encode("utf-8")
@@ -256,7 +262,8 @@ def _extract_token_data(token_response: globus_sdk.OAuthTokenResponse) -> dict:
 
 
 def _save_token_data(token_data: dict) -> None:
-    _update_env(ENV_VAR, token_data["access_token"])
+    for _name in ENV_VARS:
+        _update_env(_name, token_data["access_token"])
     if token_data.get("refresh_token"):
         _update_env(REFRESH_VAR, token_data["refresh_token"])
     if token_data.get("expires_at_seconds"):
@@ -269,12 +276,18 @@ def _load_token_data() -> dict:
         for line in ENV_FILE.read_text().splitlines():
             for key, attr in [
                 (ENV_VAR, "access_token"),
+                (ENV_VAR_LEGACY, "_access_token_legacy"),
                 (REFRESH_VAR, "refresh_token"),
                 (EXPIRES_VAR, "expires_at_seconds"),
             ]:
                 if line.startswith(f"{key}=") or line.startswith(f"export {key}="):
                     data[attr] = line.split("=", 1)[1].strip().strip('"').strip("'")
                     break
+    # The legacy spelling is only a fallback: an .env written before the rename
+    # has it alone, but when both are present the preferred name wins.
+    legacy = data.pop("_access_token_legacy", "")
+    if not data.get("access_token"):
+        data["access_token"] = legacy
     if not data.get("access_token"):
         raise FacilityAPIAuthError(
             'No ALCF IRI token in .env. Run '
@@ -726,8 +739,9 @@ def authenticate(force_reauth: bool = False, **_legacy: object) -> dict:
     - On a fresh login, prints the OAuth URL and waits for the localhost
       callback (the user must open the URL manually); never auto-launches a
       browser and never serves the post-auth HTML token page.
-    - Writes ALCF_IRI_TOKEN to the project .env (with a timestamp comment)
-      and prints the access token to stdout when done.
+    - Writes the token to the project .env under every name in ENV_VARS
+      (with a timestamp comment) and prints the access token to stdout
+      when done.
 
     `**_legacy` swallows obsolete kwargs (e.g. `open_token_page`) so older
     callers don't break.
@@ -759,7 +773,7 @@ def authenticate(force_reauth: bool = False, **_legacy: object) -> dict:
         raise FacilityAPIAuthError(
             "Interactive OAuth login is not possible here (no TTY). On a server, "
             "run `python3 alcf_iri_token.py ensure_valid` to refresh from the "
-            "stored refresh token, or set ALCF_IRI_TOKEN directly in the "
+            f"stored refresh token, or set {ENV_VAR} directly in the "
             f"environment / {ENV_FILE}."
         )
 
@@ -799,9 +813,10 @@ def authenticate(force_reauth: bool = False, **_legacy: object) -> dict:
 def _emit_token(token_data: dict) -> None:
     """Write the access token to .env and print it to stdout."""
     token = token_data["access_token"]
-    _update_env(ENV_VAR, token)
-    os.environ[ENV_VAR] = token
-    print(f"{ENV_VAR} written to {ENV_FILE}")
+    for name in ENV_VARS:
+        _update_env(name, token)
+        os.environ[name] = token
+    print(f"{' and '.join(ENV_VARS)} written to {ENV_FILE}")
     print(f"\n{ENV_VAR}:")
     print(token)
 
@@ -856,15 +871,16 @@ def logout() -> None:
     Remove ALCF IRI tokens from .env. Remote revocation is intentionally not
     attempted here.
     """
-    _remove_env_keys([ENV_VAR, REFRESH_VAR, EXPIRES_VAR])
+    _remove_env_keys([*ENV_VARS, REFRESH_VAR, EXPIRES_VAR])
     print(f"ALCF IRI tokens removed from {ENV_FILE}")
 
 
 def ensure_valid() -> bool:
     """
-    Non-interactive: refresh the cached token if close to expiry and write
-    ALCF_IRI_TOKEN to .env. Returns True on success, False if no cached token
-    is present or the refresh fails (caller should run `authenticate`).
+    Non-interactive: refresh the cached token if close to expiry and write it
+    to .env under every name in ENV_VARS. Returns True on success, False if no
+    cached token is present or the refresh fails (caller should run
+    `authenticate`).
     """
     try:
         token_data = get_token_data(force_refresh=False)

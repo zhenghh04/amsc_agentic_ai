@@ -4,15 +4,21 @@
 """Async HTTP client for the NERSC IRI API and Globus Transfer.
 
 Authentication: NERSC IRI uses a Globus OAuth2 bearer token. Obtain one with
-`python scripts/auth/nersc_iri_token.py` and store it in `NERSC_IRI_TOKEN` (.env).
+`python scripts/auth/nersc_iri_token.py` and store it in `IRI_TOKEN_NERSC`
+(the legacy `NERSC_IRI_TOKEN` spelling is still read) in .env.
 
 API docs: https://api.iri.nersc.gov
 """
 
 import asyncio
 import os
+import sys
+from pathlib import Path
 
 import httpx
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # mcp/ root
+from auth_env import environ_token as _environ_token
 
 DEFAULT_BASE_URL = "https://api.iri.nersc.gov/api/v1"
 GLOBUS_TRANSFER_BASE_URL = "https://transfer.api.globus.org/v0.10"
@@ -65,7 +71,7 @@ class NERSCIRIClient:
 
     def __init__(self) -> None:
         self.base_url = os.environ.get("NERSC_IRI_BASE_URL", DEFAULT_BASE_URL).rstrip("/")
-        self.token: str | None = os.environ.get("NERSC_IRI_TOKEN")
+        self.token: str | None = _environ_token("nersc") or None
         self.transfer_token: str | None = os.environ.get("GLOBUS_TRANSFER_TOKEN")
         # Callables returning the CURRENT token from its source of truth (the
         # per-user .env file), set by the server so every request re-reads the
